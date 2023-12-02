@@ -1,0 +1,19 @@
+name: Angular Build Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: node:21-alpine3.18
+    steps:
+      - name: Install Dependencies
+        run: npm ci
+        
+      - name: Build Angular App
+        run: ng build
