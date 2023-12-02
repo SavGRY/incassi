@@ -1,12 +1,6 @@
 name: Angular Build Test
 
-on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
   build:
@@ -14,18 +8,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-        
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '21'
-      
-      - name: Install Dependencies
+
+      - name: Install Deps and build Angular app
+        working-directory: ./incassi
         run: |
-          cd incassi
-          npm install
-        
-      - name: Build Angular App
-        run: |
-          cd incassi
+          npm ci
           npm run ng build
