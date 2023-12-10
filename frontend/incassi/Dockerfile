@@ -1,7 +1,7 @@
 FROM node:21-alpine3.18
 LABEL maintainer="Rudy Savini"
 
-WORKDIR /web
+WORKDIR /frontend
 
 COPY package.json .
 
