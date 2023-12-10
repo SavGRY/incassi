@@ -5,6 +5,7 @@ pyrightconfig.json
 
 .testmondata
 .testmondata-journal
+.pytest_cache/
 
 *.py[codt]
 
