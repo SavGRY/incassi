@@ -1,6 +1,13 @@
 services:
+
+  fastapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
   web:
     build:
-      context: ./incassi
+      context: ./frontend/incassi
       dockerfile: Dockerfile
     restart: unless-stopped

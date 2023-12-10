@@ -15,7 +15,7 @@ jobs:
           node-version: '21'
 
       - name: Install Deps and build Angular app
-        working-directory: ./incassi
+        working-directory: ./frontend/incassi
         run: |
           npm ci
           npm run ng build
