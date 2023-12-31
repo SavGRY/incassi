@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+{% block h1-content %}{% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block main-content %}
+    <div class="container pt-5">
+        <div class="row text-center">
+            <div class="navbar-brand">
+                <img src="{% static 'img/logo-placeholder-image.png' %}" alt="Logo">
+            </div>
+        </div>
+        <div class="row pt-4">
+            <form method="post" class="col-8 col-md-6 col-lg-4 m-auto">
+                <fieldset>
+                    <legend class="visually-hidden">
+                        Login
+                    </legend>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-flex justify-content-center pt-3">
+                        <input class="btn btn-primary" type="submit" value="Login">
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

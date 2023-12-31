@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block main-content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        {% block input-submit %}
+            <div class="d-flex justify-content-between aligned mt-5">
+                <p><a id="back" class="btn btn-secondary" href="{% block rollback-url %}{% url 'home' %}{% endblock %}">Cancel</a></p>
+                <input class="btn btn-primary" type="submit" value="Submit">
+            </div>
+        {% endblock input-submit %}
+    </form>
+
+{% endblock %}

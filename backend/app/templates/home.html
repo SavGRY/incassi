@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}{% endblock title %}
+
+{% block h1-content %}Savini ITS Exam{% endblock h1-content %}
+{% block main-content %}
+  <p>This is the Home Page</p>
+  {% if user.is_authenticated %}
+    <p>You are logged as <b>{{ user.username }}</b></p>
+  {% endif %}
+{% endblock main-content %}

@@ -1,19 +1,20 @@
-name: Angular Build Test
+name: Project builds
 
 on: [ push ]
 
 jobs:
-  build-fast-api:
+  build-django-app:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Test FastAPI
+      - name: Django Migrations
         working-directory: ./backend
         run: |
           pip install -r requirements.txt
-          pytest .
+          python3 manage.py makemigrations
+          python3 manage.py migrate
 
   build-web:
     runs-on: ubuntu-latest
