@@ -1,4 +1,54 @@
 repos:
+  - repo: https://github.com/myint/autoflake
+    rev: v2.2.0
+    hooks:
+      - id: autoflake
+        args:
+          - --expand-star-imports
+          - --ignore-init-module-imports
+          - --in-place
+          - --remove-all-unused-imports
+          - --remove-duplicate-keys
+          - --remove-unused-variables
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+        additional_dependencies: [ "click==8.0" ]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.10.1
+    hooks:
+      - id: pyupgrade
+        args:
+          - --keep-percent-format
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort except __init__.py
+        args: [ --settings, . ]
+        exclude: /__init__\.py$
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: debug-statements
+      - id: fix-encoding-pragma
+        args: [ "--remove" ]
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-xml
+      - id: mixed-line-ending
+        args: [ "--fix=lf" ]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.2
+    hooks:
+      - id: prettier
+        types_or: [ css, javascript, ts, json ]
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.1
     hooks:
@@ -8,16 +58,16 @@ repos:
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v8.54.0  # Use the sha / tag you want to point at
     hooks:
-    - id: eslint
-      args: [--fix]
-      additional_dependencies: [
-        # conflicts with typescript 5.3.2 (2023-11-27)
-        "typescript@5.1.6",
-        "eslint@8.54.0",
-        "@angular-eslint/eslint-plugin",
-        "@angular-eslint/eslint-plugin-template",
-        "@typescript-eslint/parser",
-        "@typescript-eslint/eslint-plugin",
-      ]
-      files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
-      types: [file]
+      - id: eslint
+        args: [ --fix ]
+        additional_dependencies: [
+          # conflicts with typescript 5.3.2 (2023-11-27)
+          "typescript@5.1.6",
+          "eslint@8.54.0",
+          "@angular-eslint/eslint-plugin",
+          "@angular-eslint/eslint-plugin-template",
+          "@typescript-eslint/parser",
+          "@typescript-eslint/eslint-plugin",
+        ]
+        files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
+        types: [ file ]

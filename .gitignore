@@ -1,6 +1,7 @@
 .idea/
 .~lock.*
 *.env
+*.db
 pyrightconfig.json
 
 .testmondata

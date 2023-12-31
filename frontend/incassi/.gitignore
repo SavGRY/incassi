@@ -48,4 +48,3 @@ docker-compose*.y*ml
 # environments
 Pipfile.lock
 Pipfile
-
