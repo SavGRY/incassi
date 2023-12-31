@@ -11,10 +11,8 @@ services:
         ./manage.py migrate && (./manage.py createsuperuser --noinput || true)
         ./manage.py runserver 0.0.0.0:8000
       "
-    ports:
-      - '8000:8000'
     volumes:
-      - ./backend/:/app/
+      - ./backend/app:/app/
       - static_volume:/app/static
     restart: unless-stopped
     env_file:
