@@ -1,0 +1,33 @@
+name: FastAPI Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Setup env and symlink
+      run: |
+        mv .docker/pg_conf.env.example .docker/pg_conf.env
+        ln -s common.yaml docker-compose.yaml
+        ln -s devel.yaml docker-compose.override.yaml
+
+    - name: Build and Test Backend
+      run: |
+        docker compose build fastapi db
+        docker compose up -d fastapi db
+        docker compose exec fastapi pytest .
+      working-directory: ./backend
