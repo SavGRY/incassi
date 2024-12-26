@@ -1,0 +1,35 @@
+name: Angular Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Setup symlink
+      run: |
+        mv .docker/pg_conf.env.example .docker/pg_conf.env
+        ln -s common.yaml docker-compose.yaml
+        ln -s devel.yaml docker-compose.override.yaml
+
+    - name: Build Angular
+      run: |
+        docker compose build web
+        docker compose up -d web
+        docker compose exec web npm run ng build
+
+    - name: Test Angular
+      run: docker compose exec web npm run ng test --no-watch --no-progress

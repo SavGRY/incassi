@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "base-dockerized-angular": {
+    "frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/base-dockerized-angular",
+            "outputPath": "dist/frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -66,10 +66,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "base-dockerized-angular:build:production"
+              "buildTarget": "frontend:build:production"
             },
             "development": {
-              "buildTarget": "base-dockerized-angular:build:development"
+              "buildTarget": "frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -77,12 +77,14 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "base-dockerized-angular:build"
+            "buildTarget": "frontend:build"
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "karmaConfig": "karma.conf.js",
+            "codeCoverage": true,
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
@@ -93,5 +95,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
