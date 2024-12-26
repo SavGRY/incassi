@@ -1,6 +1,16 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "groupName": "Containers",
+      "matchDatasources": ["docker"],
+      "schedule": ["on the first day of the week"]
+    },
+    {
+      "groupName": "Node Modules",
+      "matchDatasources": ["npm"],
+      "schedule": ["on the first day of the week"]
+    }
   ]
 }
