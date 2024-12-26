@@ -1,12 +1,15 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.13-slim-bookworm
 
 WORKDIR /backend
 
-COPY ./requirements.txt /backend/requirements.txt
+COPY requirements.txt .
 
-RUN pip install --no-cache-dir --upgrade -r /backend/requirements.txt
+RUN apt-get update && \
+    apt-get upgrade && \
+    apt-get install -y gcc libpq-dev cargo
 
-COPY . /backend/app
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
+COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "core.main:app", "--host", "0.0.0.0", "--port", "8000"]
