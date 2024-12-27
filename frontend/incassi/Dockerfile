@@ -1,4 +1,4 @@
-FROM node:21-alpine3.18
+FROM node:23-alpine3.20
 LABEL maintainer="Rudy Savini"
 
 WORKDIR /incassi
