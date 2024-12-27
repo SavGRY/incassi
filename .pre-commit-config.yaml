@@ -44,11 +44,16 @@ repos:
       - id: check-xml
       - id: mixed-line-ending
         args: [ "--fix=lf" ]
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+  - repo: local
     hooks:
-      - id: prettier
-        types_or: [ scss, css, javascript, ts, json ]
+      - id: local-biome-check
+        name: biome check
+        # use a shell command to enter firstly the directory of the project and then run biome
+        # biome is installed via npx so it's only available locally in the `frontend/incassi` folder
+        entry: sh -c "cd frontend/incassi && npx @biomejs/biome check --write --files-ignore-unknown=true --no-errors-on-unmatched"
+        language: system
+        types: [text]
+        files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?)$"
 
 #  - repo: https://github.com/pre-commit/mirrors-eslint
 #    rev: v9.17.0  # Use the sha / tag you want to point at
