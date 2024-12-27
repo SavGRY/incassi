@@ -1,5 +1,5 @@
-import {TestBed} from '@angular/core/testing';
-import {AppComponent} from './app.component';
+import { TestBed } from '@angular/core/testing';
+import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'base-dockerized-angular' title`, () => {
+  it(`should have the 'incassi' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('incassi');
