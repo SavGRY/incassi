@@ -22,12 +22,14 @@ jobs:
     - name: Setup env and symlink
       run: |
         mv .docker/pg_conf.env.example .docker/pg_conf.env
+        sed -i "s|POSTGRES_CONNECTION_STR=\"[^\"]*\"|POSTGRES_CONNECTION_STR=\"${{ secrets.DB_CONNECTION_STR }}\"|" .docker/pg_conf.env
         ln -s common.yaml docker-compose.yaml
         ln -s devel.yaml docker-compose.override.yaml
 
+    - name: Check Alembic Migration
+      run: |
+        docker compose run --rm --remove-orphans fastapi bash -c "mv alembic.ini.example alembic.ini && alembic upgrade head"
+
     - name: Build and Test Backend
       run: |
-        docker compose build fastapi db
-        docker compose up -d fastapi db
-        docker compose exec fastapi pytest .
-      working-directory: ./backend
+        docker compose run --rm --remove-orphans fastapi pytest .
