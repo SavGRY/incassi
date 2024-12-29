@@ -1,21 +1,28 @@
 from datetime import datetime
 from enum import Enum
 
+from core.db.database import Base
 from sqlalchemy import Enum as SqlAlchemyEnum
 from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import DateTime
-
-from .database import Base
 
 
 class User(Base):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True)
+    first_name: Mapped[str] = mapped_column(String, nullable=False)
+    last_name: Mapped[str] = mapped_column(String, nullable=False)
     password: Mapped[str] = mapped_column(String)
     document: Mapped[list["Document"]] = relationship("Document", back_populates="user")
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__} - id: ({self.id})"
 
 
 class Client(Base):

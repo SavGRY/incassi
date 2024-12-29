@@ -1,20 +1,12 @@
+from core.db.database import engine, get_db
+from core.db.models import Base
 from fastapi import FastAPI
-
-from .database import SessionLocal, engine
-from .models import Base
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+db = get_db()
 
 
 @app.get("/")
