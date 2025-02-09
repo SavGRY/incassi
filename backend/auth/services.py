@@ -47,11 +47,13 @@ def authenticate_user(email: str, password: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    if not verify_password(password, user.hashed_password):
+    # `user.password` is the hashed password stored in the db
+    # `hashed_password_from_form` is the hashed password from the form
+    # if they are not equal, the password is wrong
+    if not verify_password(plain_password=password, hashed_password=user.password):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot verify password"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong password, try again"
         )
-
     return user
 
 
@@ -67,6 +69,20 @@ def create_access_token(
     return TokenData(token=encoded_jwt, expire_at=expire)
 
 
+async def get_user_by_token(token: str):
+    db = next(get_db())
+    user = db.query(User).filter_by(token=token).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token. Please login again.",
+        )
+    return user
+
+
+# reminder: is this function used? Could it be simplified
+# I think it could be simplified by using the `get_user_by_token` function
+# because it's doing the same thing
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
