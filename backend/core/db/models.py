@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from core.db.database import Base
+from sqlalchemy import Boolean
 from sqlalchemy import Enum as SqlAlchemyEnum
 from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -13,10 +14,19 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True)
-    first_name: Mapped[str] = mapped_column(String, nullable=False)
-    last_name: Mapped[str] = mapped_column(String, nullable=False)
+    first_name: Mapped[str] = mapped_column(String, nullable=True)
+    last_name: Mapped[str] = mapped_column(String, nullable=True)
+    is_superuser: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     password: Mapped[str] = mapped_column(String)
-    document: Mapped[list["Document"]] = relationship("Document", back_populates="user")
+    token: Mapped[str] = mapped_column(String, nullable=True)
+    documents: Mapped[list["Document"]] = relationship(
+        "Document", back_populates="user"
+    )
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -37,6 +47,7 @@ class Client(Base):
         String(2),
         nullable=False,
     )
+    incassos: Mapped[list["Incasso"]] = relationship("Incasso", back_populates="client")
 
 
 class Document(Base):
@@ -51,8 +62,11 @@ class Document(Base):
     # FK
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
 
-    # Relationship
-    user: Mapped[User] = relationship("User", back_populates="document")
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="documents")
+    incassos: Mapped[list["Incasso"]] = relationship(
+        "Incasso", back_populates="document"
+    )
 
 
 class TypeOfIncasso(str, Enum):
@@ -77,6 +91,6 @@ class Incasso(Base):
     document_id: Mapped[int] = mapped_column(Integer, ForeignKey("document.id"))
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey("client.id"))
 
-    # Relationships
-    document: Mapped[Document] = relationship("Document", back_populates="incasso")
-    client: Mapped[Client] = relationship("Client", back_populates="client")
+    # Fixed relationships
+    document: Mapped["Document"] = relationship("Document", back_populates="incassos")
+    client: Mapped["Client"] = relationship("Client", back_populates="incassos")
