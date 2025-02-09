@@ -22,6 +22,7 @@ jobs:
     - name: Setup symlink
       run: |
         mv .docker/pg_conf.env.example .docker/pg_conf.env
+        mv .docker/auth_opt.env.example .docker/auth_opt.env
         ln -s common.yaml docker-compose.yaml
         ln -s devel.yaml docker-compose.override.yaml
 

@@ -55,22 +55,22 @@ def authenticate_user(email: str, password: str):
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(
+    data: dict, expires_delta: timedelta | None = None
+) -> dict[str, str | datetime]:
     to_encode: dict = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return TokenData(token=encoded_jwt, expire_at=expire)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         if not len(ALGORITHM):
@@ -85,11 +85,10 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
             )
-        token_data = TokenData(email=email)
     except InvalidTokenError:
         raise credentials_exception
 
-    user = get_user(email=token_data.email)
+    user = get_user(email=email)
 
     if user is None:
         raise HTTPException(
@@ -105,8 +104,8 @@ def check_user_already_registered(email: str):
 
     if user_in_db:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists, please login",
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User {} already exists, please login".format(email),
         )
 
 
