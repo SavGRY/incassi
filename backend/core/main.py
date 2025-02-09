@@ -3,6 +3,7 @@ from auth.schema import (
     UserFromForm,
 )
 from auth.services import (
+    authenticate_user,
     check_user_already_registered,
     get_password_hash,
     validate_email,
@@ -14,10 +15,14 @@ from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from fastapi import status
+from core.middleware import create_login_middleware
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Add middleware using the factory function
+app.middleware("http")(create_login_middleware())
 
 
 @app.get("/")
@@ -52,3 +57,16 @@ async def register_user(payload: UserFromForm, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
+
+
+@app.get("/protected")
+async def protected_route():
+    return {"message": "Congrats! You can see this route!"}
+
+
+@app.post("/login")
+async def login(email: str, password: str, db: Session = Depends(get_db)):
+    user = authenticate_user(email, password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {"message": "Login successful", "token": user.token}
