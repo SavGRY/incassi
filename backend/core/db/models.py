@@ -19,6 +19,7 @@ class User(Base):
     is_superuser: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     password: Mapped[str] = mapped_column(String)
+    token: Mapped[str] = mapped_column(String, nullable=True)
     documents: Mapped[list["Document"]] = relationship(
         "Document", back_populates="user"
     )
