@@ -4,8 +4,8 @@ WORKDIR /backend
 
 COPY requirements.txt .
 
-RUN apt-get update && \
-    apt-get upgrade && \
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
     apt-get install -y gcc libpq-dev cargo
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
