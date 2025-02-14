@@ -12,14 +12,24 @@ from auth.services import (
 from core.db.database import engine, get_db
 from core.db.models import Base, User
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from fastapi import status
-from core.middleware import create_login_middleware
+from core.middleware import ORIGINS, create_login_middleware
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Add middleware using the factory function
 app.middleware("http")(create_login_middleware())
