@@ -3,6 +3,18 @@ from fastapi.responses import JSONResponse
 from auth.services import get_user_by_token
 from fastapi import status
 
+__all__ = ["create_login_middleware", "ORIGINS"]
+
+ORIGINS = [
+    # TODO: remove localhost when "production"
+    # FastAPI dev server
+    "http://localhost:8000",
+    # Angular app
+    "http://localhost:4200",
+    # Postgres db
+    "http://localhost:5173",
+]
+
 
 def create_login_middleware():
     async def login_required(request: Request, call_next):

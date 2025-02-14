@@ -59,7 +59,7 @@ def authenticate_user(email: str, password: str):
 
 def create_access_token(
     data: dict, expires_delta: timedelta | None = None
-) -> dict[str, str | datetime]:
+) -> TokenData:
     to_encode: dict = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
