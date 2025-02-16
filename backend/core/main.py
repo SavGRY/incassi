@@ -11,12 +11,17 @@ from auth.services import (
 )
 from core.db.database import engine, get_db
 from core.db.models import Base, User
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from fastapi import status
-from core.middleware import ORIGINS, create_login_middleware
+from core.middleware import (
+    ORIGINS,
+    create_already_authenticated_middleware,
+    create_login_middleware,
+)
+from typing import Annotated
 
 Base.metadata.create_all(bind=engine)
 
@@ -33,6 +38,7 @@ app.add_middleware(
 
 # Add middleware using the factory function
 app.middleware("http")(create_login_middleware())
+app.middleware("http")(create_already_authenticated_middleware())
 
 
 @app.get("/")
@@ -75,8 +81,16 @@ async def protected_route():
 
 
 @app.post("/login")
-async def login(email: str, password: str, db: Session = Depends(get_db)):
-    user = authenticate_user(email, password)
+async def login(
+    email: Annotated[str, Form()],
+    password: Annotated[str, Form()],
+    db: Session = Depends(get_db),
+):
+    user = authenticate_user(email=email, password=password, db=db)
+
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    user.is_active = True
+    db.commit()
     return {"message": "Login successful", "token": user.token}
