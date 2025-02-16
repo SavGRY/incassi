@@ -14,12 +14,16 @@
       "dist",
       "src/assets/**",
       "tsconfig.*",
-      "karma.conf.js"
+      "karma.conf.js",
+      ".angular/",
+      "node_modules/",
+      "src/environments/"
     ]
   },
   "formatter": {
     "enabled": true,
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "lineWidth": 120
   },
   "organizeImports": {
     "enabled": true

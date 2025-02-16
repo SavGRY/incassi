@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common'
-import {Component, type Signal, computed} from '@angular/core'
+import {Component, type OnDestroy, type Signal, computed, inject} from '@angular/core'
 import {toSignal} from '@angular/core/rxjs-interop'
 import {
   type AbstractControl,
@@ -10,13 +10,21 @@ import {
   type ValidationErrors,
   Validators,
 } from '@angular/forms'
+import {Router} from '@angular/router'
+import {Subscription} from 'rxjs'
+import type {LoginResponse} from '../services/auth/Models'
+import {AuthService} from '../services/auth/auth.service'
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
+  private readonly router: Router = inject(Router)
+  private readonly authService: AuthService = inject(AuthService)
+  private subscription: Subscription = new Subscription()
+
   emailDomainValidator(control: AbstractControl): ValidationErrors | null {
     const email = control.value
     // get the domain from the email
@@ -28,7 +36,7 @@ export class LoginComponent {
   }
 
   loginForm: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.required, this.emailDomainValidator.bind(this)]),
+    email: new FormControl('', [this.emailDomainValidator, Validators.required]),
     password: new FormControl('', [Validators.required]),
   })
 
@@ -39,12 +47,29 @@ export class LoginComponent {
     return Object.keys(this.loginForm.controls)
   }
 
-  getValue() {
+  getValue(): void {
     console.log(this.isFormValid())
   }
 
-  onSubmit() {
-    console.log(this.loginForm.value)
+  onLogin(): void {
+    this.subscription.add(
+      this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
+        next: (response: LoginResponse) => {
+          localStorage.setItem('token', response.token)
+          this.router.navigate(['/'])
+        },
+        error: (error) => {
+          console.error(error)
+        },
+      })
+    )
+  }
+
+  onSubmit(): void {
+    this.onLogin()
     this.loginForm.reset()
+  }
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe()
   }
 }
