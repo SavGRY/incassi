@@ -17,7 +17,8 @@
       "karma.conf.js",
       ".angular/",
       "node_modules/",
-      "src/environments/"
+      "src/environments/",
+      "coverage/"
     ]
   },
   "formatter": {

@@ -11,9 +11,18 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+__all__ = [
+    "verify_password",
+    "get_password_hash",
+    "get_user",
+    "get_user_by_token",
+    "is_token_linked_to_correct_user",
+]
 
 
 def verify_password(plain_password, hashed_password):
@@ -40,13 +49,12 @@ def get_user(email: str):
         )
 
 
-def authenticate_user(email: str, password: str):
-    user = get_user(email=email)
+def authenticate_user(email: str, password: str, db: Session):
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
-
     # `user.password` is the hashed password stored in the db
     # `hashed_password_from_form` is the hashed password from the form
     # if they are not equal, the password is wrong
@@ -78,6 +86,13 @@ async def get_user_by_token(token: str):
             detail="Invalid token. Please login again.",
         )
     return user
+
+
+def is_token_linked_to_correct_user(token: str, email: str) -> bool:
+    user = get_user_by_token(token=token)
+    if user.email != email:
+        return False
+    return True
 
 
 # reminder: is this function used? Could it be simplified
