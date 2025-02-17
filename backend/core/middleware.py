@@ -80,7 +80,7 @@ def create_already_authenticated_middleware():
             # Check if user is already authenticated via token
             auth_header = request.headers["Authorization"]
             token = auth_header.removeprefix("Token ")
-            user = get_user_by_token(token=token)
+            user = await get_user_by_token(token=token)
             if not is_token_linked_to_correct_user(token=token, email=user.email):
                 return JSONResponse(
                     status_code=status.HTTP_403_FORBIDDEN,
