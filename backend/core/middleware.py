@@ -1,3 +1,4 @@
+from core.domain import API_PREFIX
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from auth.services import is_token_linked_to_correct_user, get_user_by_token
@@ -8,6 +9,7 @@ __all__ = [
     "create_login_middleware",
     "ORIGINS",
 ]
+
 
 ORIGINS = [
     # TODO: remove localhost when "production"
@@ -22,9 +24,12 @@ ORIGINS = [
 
 def create_login_middleware():
     async def login_required(request: Request, call_next):
+
         # List of paths that needs to be public accessible
         # TODO: remove `/docs` and `/openapi.json` when "production"
-        public_paths = ["/register", "/login", "/docs", "/openapi.json"]
+        api_paths = {API_PREFIX + path for path in ["/register", "/login"]}
+
+        public_paths = api_paths | {"/docs", "/openapi.json"}
 
         # Allow access to public paths without authentication
         if request.url.path in public_paths:
