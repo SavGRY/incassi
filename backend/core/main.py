@@ -9,8 +9,9 @@ from auth.services import (
     validate_email,
     create_access_token,
 )
+from core.domain import API_PREFIX
 from core.db.database import engine, get_db
-from core.db.models import Base, User
+from core.db.models import Base, User, Client
 from fastapi import Depends, FastAPI, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -22,6 +23,8 @@ from core.middleware import (
     create_login_middleware,
 )
 from typing import Annotated
+
+from core.schema import ClientFromForm
 
 Base.metadata.create_all(bind=engine)
 
@@ -46,7 +49,7 @@ def read_root():
     return {"msg": "Hello World"}
 
 
-@app.post("/register")
+@app.post(f"{API_PREFIX}/register")
 async def register_user(payload: UserFromForm, db: Session = Depends(get_db)):
     validate_email(payload.email)
     check_user_already_registered(payload.email)
@@ -69,6 +72,7 @@ async def register_user(payload: UserFromForm, db: Session = Depends(get_db)):
                 new_user.email
             ),
         )
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
@@ -80,7 +84,7 @@ async def protected_route():
     return {"message": "Congrats! You can see this route!"}
 
 
-@app.post("/login")
+@app.post(f"{API_PREFIX}/login")
 async def login(
     email: Annotated[str, Form()],
     password: Annotated[str, Form()],
@@ -94,3 +98,68 @@ async def login(
     user.is_active = True
     db.commit()
     return {"message": "Login successful", "token": user.token}
+
+
+@app.post(f"{API_PREFIX}/client/create")
+async def create_client(
+    client_payload: Annotated[ClientFromForm, Form()], db: Session = Depends(get_db)
+):
+    if len(client_payload.province) > 2:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=f"Province {client_payload.province} has more than 2 letters: {len(client_payload.province)}",
+        )
+
+    new_client: Client = Client(
+        code=client_payload.code,
+        name=client_payload.name,
+        address=client_payload.address,
+        province=client_payload.province,
+        city=client_payload.city,
+    )
+    try:
+        db.add(new_client)
+        db.commit()
+        db.refresh(new_client)
+    except Exception as e:
+        if not client_payload:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST, content="No client found"
+            )
+
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=f"An error occurred: {str(e)}",
+        )
+
+
+@app.get(f"{API_PREFIX}/client/list")
+async def get_client_list(db: Session = Depends(get_db)):
+    return db.query(Client).all()
+
+
+@app.delete(API_PREFIX + "/client/{client_code}")
+async def delete_client(client_code: int, db: Session = Depends(get_db)):
+    if not client_code:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=f"client_id not found, Please provide a client_id",
+        )
+    client = db.query(Client).filter(Client.code == client_code).first()
+    if not client:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=f"Client with code {client_code} not found",
+        )
+    db.delete(client)
+    db.commit()
+    return {"message": f"Client {client_code} deleted successfully"}
+
+
+@app.patch(API_PREFIX + "/client/{client_code}")
+async def update_client(
+    client_payload: Annotated[ClientFromForm, Form()],
+    client_code: int,
+    db: Session = Depends(get_db),
+):
+    pass

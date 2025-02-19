@@ -12,7 +12,7 @@ from sqlalchemy.types import DateTime
 class User(Base):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String, unique=True)
     first_name: Mapped[str] = mapped_column(String, nullable=True)
     last_name: Mapped[str] = mapped_column(String, nullable=True)
@@ -38,7 +38,7 @@ class User(Base):
 class Client(Base):
     __tablename__ = "client"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     code: Mapped[int] = mapped_column(Integer, nullable=False)
     address: Mapped[str] = mapped_column(String, nullable=False)
@@ -57,7 +57,7 @@ class Document(Base):
 
     __tablename__ = "document"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     creation_date: Mapped[datetime] = mapped_column(DateTime)
     # FK
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
@@ -81,7 +81,7 @@ class Incasso(Base):
 
     __tablename__ = "incasso"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     type_of_payment: Mapped[TypeOfIncasso] = mapped_column(
         SqlAlchemyEnum(TypeOfIncasso)
     )

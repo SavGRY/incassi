@@ -16,6 +16,14 @@ class Client(BaseModel):
         orm_mode = True
 
 
+class ClientFromForm(BaseModel):
+    code: int
+    name: str
+    address: str
+    city: str
+    province: str
+
+
 class Document(BaseModel):
     id: int
     creation_date: datetime
