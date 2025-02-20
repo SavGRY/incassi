@@ -38,16 +38,21 @@ class User(Base):
 class Client(Base):
     __tablename__ = "client"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[int] = mapped_column(primary_key=True, nullable=False)
+    address: Mapped[str] = mapped_column(String, nullable=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    code: Mapped[int] = mapped_column(Integer, nullable=False)
-    address: Mapped[str] = mapped_column(String, nullable=False)
     city: Mapped[str] = mapped_column(String, nullable=False)
     province: Mapped[str] = mapped_column(
         String(2),
         nullable=False,
     )
     incassos: Mapped[list["Incasso"]] = relationship("Incasso", back_populates="client")
+
+    def __str__(self):
+        return f"Client {self.code}"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__} - Code: ({self.code})"
 
 
 class Document(Base):
@@ -89,7 +94,7 @@ class Incasso(Base):
 
     # FK
     document_id: Mapped[int] = mapped_column(Integer, ForeignKey("document.id"))
-    client_id: Mapped[int] = mapped_column(Integer, ForeignKey("client.id"))
+    client_code: Mapped[int] = mapped_column(Integer, ForeignKey("client.code"))
 
     # Fixed relationships
     document: Mapped["Document"] = relationship("Document", back_populates="incassos")
