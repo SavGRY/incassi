@@ -1,5 +1,5 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http'
-import {Injectable, inject} from '@angular/core'
+import {Injectable, inject, signal} from '@angular/core'
 import type {Observable} from 'rxjs'
 import type {LoginResponse} from './Models'
 
@@ -12,7 +12,7 @@ export class AuthService {
   private readonly httpOptions: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/x-www-form-urlencoded',
   })
-
+  token = signal('')
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, `email=${email}&password=${password}`, {
       headers: this.httpOptions,

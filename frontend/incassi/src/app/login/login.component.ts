@@ -10,13 +10,13 @@ import {
   type ValidationErrors,
   Validators,
 } from '@angular/forms'
-import {Router} from '@angular/router'
+import {Router, RouterLink} from '@angular/router'
 import {Subscription} from 'rxjs'
 import type {LoginResponse} from '../services/auth/Models'
 import {AuthService} from '../services/auth/auth.service'
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -40,10 +40,9 @@ export class LoginComponent implements OnDestroy {
     password: new FormControl('', [Validators.required]),
   })
 
-  isFormInvalid = computed((): boolean => this.loginForm.invalid)
   formStatusSignal: Signal<FormControlStatus> = toSignal(this.loginForm.statusChanges, {initialValue: 'INVALID'})
   isFormValid = computed((): boolean => this.formStatusSignal() === 'VALID')
-  get lognFormElement(): string[] {
+  get loginFormElement(): string[] {
     return Object.keys(this.loginForm.controls)
   }
 
