@@ -27,7 +27,7 @@ def create_login_middleware():
 
         # List of paths that needs to be public accessible
         # TODO: remove `/docs` and `/openapi.json` when "production"
-        api_paths = {API_PREFIX + path for path in ["/register", "/login"]}
+        api_paths = {API_PREFIX + "/auth" + path for path in ["/register", "/login"]}
 
         public_paths = api_paths | {"/docs", "/openapi.json"}
 
@@ -40,7 +40,6 @@ def create_login_middleware():
             # to handle the case where the header is not present with a KeyError.
             # This is a more Pythonic way to handle this situation.
             auth_header = request.headers["Authorization"]
-
             # Check if it starts with "Token "
             if not auth_header.startswith("Token "):
                 return JSONResponse(
@@ -50,7 +49,6 @@ def create_login_middleware():
 
             # Extract the token
             token = auth_header.removeprefix("Token ")
-
             # Validate token and get user
             user = await get_user_by_token(token)
 
@@ -70,7 +68,7 @@ def create_login_middleware():
 
 def create_already_authenticated_middleware():
     async def already_authenticated(request: Request, call_next):
-        checked_path: list[str] = ["/login", "/register"]
+        checked_path = {API_PREFIX + "/auth" + path for path in ["/register", "/login"]}
 
         if request.url.path not in checked_path:
             return await call_next(request)

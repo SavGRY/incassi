@@ -8,7 +8,7 @@ import type {LoginResponse} from './Models'
 })
 export class AuthService {
   private readonly http: HttpClient = inject(HttpClient)
-  private readonly API_URL: string = 'http://localhost:8000'
+  private readonly API_URL: string = 'http://localhost:8000/api/v1/auth'
   private readonly httpOptions: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/x-www-form-urlencoded',
   })
