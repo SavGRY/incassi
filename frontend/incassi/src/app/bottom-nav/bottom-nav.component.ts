@@ -1,10 +1,17 @@
-import {Component, ElementRef, viewChild} from '@angular/core';
+import {Component, signal} from '@angular/core';
+import {BottomSheetComponent} from '../../shared/bottom-sheet/bottom-sheet.component';
 import {DarkModeSwitcherComponent} from '../../shared/dark-mode-switcher/dark-mode-switcher.component';
 
 @Component({
   selector: 'app-bottom-nav',
-  imports: [DarkModeSwitcherComponent],
+  imports: [DarkModeSwitcherComponent, BottomSheetComponent],
   templateUrl: './bottom-nav.component.html',
   styleUrl: './bottom-nav.component.scss',
 })
-export class BottomNavComponent {}
+export class BottomNavComponent {
+  isBottomSheetOpen = signal(false);
+
+  toggleBottomSheet(): void {
+    this.isBottomSheetOpen.update((state) => !state);
+  }
+}

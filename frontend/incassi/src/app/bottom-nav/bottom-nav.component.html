@@ -15,7 +15,6 @@
         <div id='tooltip-home' role='tooltip'
              class='absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700'>
             Home
-            <div class='tooltip-arrow' data-popper-arrow></div>
         </div>
 
         <button data-tooltip-target='tooltip-file' type='button'
@@ -31,11 +30,11 @@
         <div id='tooltip-file' role='tooltip'
              class='absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700'>
             File
-            <div class='tooltip-arrow' data-popper-arrow></div>
         </div>
 
         <div class='flex items-center justify-center'>
             <button data-tooltip-target='tooltip-new' type='button'
+                    (click)='toggleBottomSheet()'
                     class='inline-flex flex-col items-center justify-center w-10 h-10 font-medium bg-blue-600 rounded-full hover:bg-blue-700 group focus:ring-4 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800'>
                 <svg class='w-4 h-4 text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' fill='none'
                      viewBox='0 0 18 18'>
@@ -49,7 +48,6 @@
         <div id='tooltip-new' role='tooltip'
              class='absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700'>
             Create new item
-            <div class='tooltip-arrow' data-popper-arrow></div>
         </div>
         <button data-tooltip-target='tooltip-search' type='button'
                 class='inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group'>
@@ -63,10 +61,10 @@
         <div id='tooltip-search' role='tooltip'
              class='absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700'>
             Search
-            <div class='tooltip-arrow' data-popper-arrow></div>
         </div>
 
-        <button data-tooltip-target='tooltip-settings' data-dropdown-toggle="dropdownTop" data-dropdown-placement="top" type='button'
+        <button data-tooltip-target='tooltip-settings' data-dropdown-toggle='dropdownTop' data-dropdown-placement='top'
+                type='button'
                 class='inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-gray-50 dark:hover:bg-gray-800 group'>
             <svg
                 class='w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500'
@@ -79,20 +77,28 @@
         <div id='tooltip-settings' role='tooltip'
              class='absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700'>
             Settings
-            <div class='tooltip-arrow' data-popper-arrow></div>
         </div>
     </div>
 
-    <div id="dropdownTop" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownTopButton">
-      <li>
-          <div class='flex justify-between items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white'>
-            <app-dark-mode-switcher #darkModeComponent></app-dark-mode-switcher>
-          </div>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Log out</a>
-      </li>
-    </ul>
+    <div id='dropdownTop'
+         class='z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700'>
+        <ul class='py-2 text-sm text-gray-700 dark:text-gray-200' aria-labelledby='dropdownTopButton'>
+            <li>
+                <div
+                    class='flex justify-between items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white'>
+                    <app-dark-mode-switcher></app-dark-mode-switcher>
+                </div>
+            </li>
+            <li>
+                <a href='#' class='block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white'>Log
+                    out</a>
+            </li>
+        </ul>
+    </div>
 </div>
-</div>
+<app-bottom-sheet
+    [title]="'Suca'"
+    [isOpen]='isBottomSheetOpen()'
+    (closeSheet)='toggleBottomSheet()'>
+    <p>Content Here</p>
+</app-bottom-sheet>
