@@ -1,6 +1,6 @@
 import {Component, signal} from '@angular/core';
-import {BottomSheetComponent} from '../../shared/bottom-sheet/bottom-sheet.component';
-import {DarkModeSwitcherComponent} from '../../shared/dark-mode-switcher/dark-mode-switcher.component';
+import {BottomSheetComponent} from '../bottom-sheet/bottom-sheet.component';
+import {DarkModeSwitcherComponent} from '../dark-mode-switcher/dark-mode-switcher.component';
 
 @Component({
   selector: 'app-bottom-nav',

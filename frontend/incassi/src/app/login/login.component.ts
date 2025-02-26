@@ -12,7 +12,7 @@ import {
 } from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
-import type {LoginResponse} from '../services/auth/Models';
+import type {LoginResponse} from '../../models/Auth';
 import {AuthService} from '../services/auth/auth.service';
 @Component({
   selector: 'app-login',
