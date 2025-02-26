@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {initFlowbite} from 'flowbite';
-import {BottomNavComponent} from './bottom-nav/bottom-nav.component';
+import {BottomNavComponent} from '../shared/bottom-nav/bottom-nav.component';
 
 @Component({
   selector: 'app-root',
