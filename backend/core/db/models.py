@@ -55,28 +55,9 @@ class Client(Base):
         return f"{self.__class__.__name__} - Code: ({self.code})"
 
 
-class Document(Base):
-    """
-    Per documento s'intende l'oggetto in PDF che verrà generato
-    """
-
-    __tablename__ = "document"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    creation_date: Mapped[datetime] = mapped_column(DateTime)
-    # FK
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
-
-    # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="documents")
-    incassos: Mapped[list["Incasso"]] = relationship(
-        "Incasso", back_populates="document"
-    )
-
-
 class TypeOfIncasso(str, Enum):
-    check: str = "assegno"
-    cash: str = "contanti"
+    check = "assegno"
+    cash = "contanti"
 
 
 class Incasso(Base):
@@ -99,3 +80,22 @@ class Incasso(Base):
     # Fixed relationships
     document: Mapped["Document"] = relationship("Document", back_populates="incassos")
     client: Mapped["Client"] = relationship("Client", back_populates="incassos")
+
+
+class Document(Base):
+    """
+    Per documento s'intende l'oggetto in PDF che verrà generato
+    """
+
+    __tablename__ = "document"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    creation_date: Mapped[datetime] = mapped_column(DateTime)
+    # FK
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="documents")
+    incassos: Mapped[list["Incasso"]] = relationship(
+        "Incasso", back_populates="document"
+    )
