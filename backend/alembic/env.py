@@ -1,9 +1,10 @@
 import os
 from logging.config import fileConfig
-
+from core.db.database import Base
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+target_metadata = Base.metadata
 POSTGRES_CONNECTION_STR: str = os.environ.get(
     "POSTGRES_CONNECTION_STR", "postgresql://username:password@db_host/db"
 )
