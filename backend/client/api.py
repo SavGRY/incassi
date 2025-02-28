@@ -1,11 +1,10 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from core.db.database import get_db
 from core.db.models import Client
 from core.schema import Client as ClientSchema, ClientFromForm
-from fastapi import status
+from fastapi import status, HTTPException
 
 
 router = APIRouter(prefix="/client", tags=["client"])
@@ -22,9 +21,9 @@ async def create_client(
     :param db: The db session, defaults to Depends(get_db)
     """
     if len(client_payload.province) > 2:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=f"Province {client_payload.province} has more than 2 letters: {len(client_payload.province)}",
+            detail=f"Province {client_payload.province} has more than 2 letters: {len(client_payload.province)}",
         )
 
     new_client: Client = Client(
@@ -39,9 +38,9 @@ async def create_client(
         db.commit()
         db.refresh(new_client)
     except Exception:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content="A critical error occurred",
+            detail="A critical error occurred",
         )
 
 
@@ -57,9 +56,9 @@ async def get_client_list(
     """
     client_list = db.query(Client).all()
     if not client_list:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            content="No clients found",
+            detail="No clients found",
         )
     return list(db.query(Client).all())
 
@@ -78,9 +77,9 @@ async def get_client_detail(client_code: int, db: Session = Depends(get_db)):
     """
     client_detail = db.query(Client).filter(Client.code == client_code).first()
     if not client_detail:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=f"No detail found for {client_code}",
+            detail=f"No detail found for {client_code}",
         )
     return client_detail
 
@@ -98,15 +97,15 @@ async def delete_client(client_code: int, db: Session = Depends(get_db)):
     :rtype:  JSONResponse
     """
     if not client_code:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content="client_id not found, Please provide a client_id",
+            detail="client_id not found, Please provide a client_id",
         )
     client = db.query(Client).filter(Client.code == client_code).first()
     if not client:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=f"Client with code {client_code} not found",
+            detail=f"Client with code {client_code} not found",
         )
     db.delete(client)
     db.commit()
@@ -134,9 +133,9 @@ async def update_client(
     """
     client = db.query(Client).filter(Client.code == client_code).first()
     if not client:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=f"Client with code {client_code} not found",
+            detail=f"Client with code {client_code} not found",
         )
     client = Client(
         code=client_payload.code,

@@ -1,7 +1,5 @@
 from typing import Annotated
 from fastapi import APIRouter, Form
-from fastapi.params import Depends
-from pytest import Session
 
 from .schema import TokenData, UserFromForm
 from .services import (
@@ -12,11 +10,9 @@ from .services import (
     validate_email,
 )
 from core.db.database import get_db
-from core.db.database import get_db
 from core.db.models import User
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from fastapi.responses import JSONResponse
 from fastapi import status
 
 
@@ -40,13 +36,12 @@ async def register_user(payload: UserFromForm, db: Session = Depends(get_db)):
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_201_CREATED,
-            content="User with email {} has been successfully created".format(
+            detail="User with email {} has been successfully created".format(
                 new_user.email
             ),
         )
-
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
@@ -63,6 +58,12 @@ async def login(
 
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if user.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="You are already authenticated. Please logout first.",
+        )
 
     user.is_active = True
     db.commit()

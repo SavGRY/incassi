@@ -1,12 +1,13 @@
 import pytest
-from core.db.models import User
-from core.db.database import SessionLocal
+
 from auth.services import get_password_hash, create_access_token
+from core.db.database import SessionLocal
+from core.db.models import User
 
 __all__ = ["test_user"]
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def test_user():
     # Create a database session
     db = SessionLocal()
@@ -20,7 +21,10 @@ def test_user():
         token_data = create_access_token(data={"email": test_email})
 
         test_user = User(
-            email=test_email, password=hashed_password, token=token_data.token
+            email=test_email,
+            password=hashed_password,
+            token=token_data.token,
+            is_active=True,
         )
 
         db.add(test_user)
