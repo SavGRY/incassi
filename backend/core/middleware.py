@@ -1,6 +1,7 @@
+import logging
+
 from core.domain import API_PREFIX
-from fastapi import Request
-from fastapi.responses import JSONResponse
+from fastapi import Request, HTTPException
 from auth.services import is_token_linked_to_correct_user, get_user_by_token
 from fastapi import status
 
@@ -9,6 +10,7 @@ __all__ = [
     "create_login_middleware",
     "ORIGINS",
 ]
+logger = logging.getLogger(__name__)
 
 
 ORIGINS = [
@@ -42,9 +44,9 @@ def create_login_middleware():
             auth_header = request.headers["Authorization"]
             # Check if it starts with "Token "
             if not auth_header.startswith("Token "):
-                return JSONResponse(
+                raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"detail": "Invalid token format."},
+                    detail="Invalid token format.",
                 )
 
             # Extract the token
@@ -58,9 +60,9 @@ def create_login_middleware():
             return await call_next(request)
 
         except KeyError:
-            return JSONResponse(
+            raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"detail": "Unauthorized: No correct header found"},
+                detail="Unauthorized: No correct header found",
             )
 
     return login_required
@@ -85,28 +87,24 @@ def create_already_authenticated_middleware():
             token = auth_header.removeprefix("Token ")
             user = await get_user_by_token(token=token)
             if not is_token_linked_to_correct_user(token=token, email=user.email):
-                return JSONResponse(
+                raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    content={
-                        "detail": "Unauthorized: Token is not linked to the correct user"
-                    },
+                    detail="Unauthorized: Token is not linked to the correct user",
                 )
             if user.is_active:
-                return JSONResponse(
+                raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    content={
-                        "detail": "You are already authenticated. Please logout first."
-                    },
+                    detail="You are already authenticated. Please logout first.",
                 )
         except KeyError:
-            return JSONResponse(
+            raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                content={"detail": "Unauthorized: No token found"},
+                detail="Unauthorized: No token found",
             )
         except Exception:
-            return JSONResponse(
+            raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "A critical error occurred"},
+                detail="A critical error occurred",
             )
 
         return await call_next(request)
