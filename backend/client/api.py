@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
 from core.db.database import get_db
 from core.db.models import Client
-from core.schema import Client as ClientSchema, ClientFromForm
+from client.schema import Client as ClientSchema, ClientFromForm
 from fastapi import status, HTTPException
 
 
