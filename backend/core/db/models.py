@@ -1,12 +1,13 @@
 from datetime import datetime
 from enum import Enum
 
-from core.db.database import Base
 from sqlalchemy import Boolean
 from sqlalchemy import Enum as SqlAlchemyEnum
 from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import DateTime
+
+from core.db.database import Base
 
 
 class User(Base):
@@ -21,7 +22,8 @@ class User(Base):
     password: Mapped[str] = mapped_column(String)
     token: Mapped[str] = mapped_column(String, nullable=True)
     documents: Mapped[list["Document"]] = relationship(
-        "Document", back_populates="user"
+        "Document",
+        back_populates="user",
     )
 
     @property
@@ -46,7 +48,10 @@ class Client(Base):
         String(2),
         nullable=False,
     )
-    incassos: Mapped[list["Incasso"]] = relationship("Incasso", back_populates="client")
+    incassos: Mapped[list["Incasso"]] = relationship(
+        "Incasso",
+        back_populates="client",
+    )
 
     def __str__(self):
         return f"Client {self.code}"
@@ -74,12 +79,18 @@ class Incasso(Base):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
 
     # FK
-    document_id: Mapped[int] = mapped_column(Integer, ForeignKey("document.id"))
-    client_code: Mapped[int] = mapped_column(Integer, ForeignKey("client.code"))
-
+    client_code: Mapped[int] = mapped_column(
+        Integer, ForeignKey("client.code", ondelete="CASCADE")
+    )
+    document_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("document.id", ondelete="CASCADE")
+    )
     # Fixed relationships
+    client: Mapped["Client"] = relationship(
+        "Client",
+        back_populates="incassos",
+    )
     document: Mapped["Document"] = relationship("Document", back_populates="incassos")
-    client: Mapped["Client"] = relationship("Client", back_populates="incassos")
 
 
 class Document(Base):
@@ -92,7 +103,9 @@ class Document(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     creation_date: Mapped[datetime] = mapped_column(DateTime)
     # FK
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("user.id", ondelete="CASCADE")
+    )
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="documents")
