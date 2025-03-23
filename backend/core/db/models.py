@@ -5,7 +5,6 @@ from sqlalchemy import Boolean
 from sqlalchemy import Enum as SqlAlchemyEnum
 from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import DateTime
 
 from core.db.database import Base
 
@@ -21,8 +20,12 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     password: Mapped[str] = mapped_column(String)
     token: Mapped[str] = mapped_column(String, nullable=True)
-    documents: Mapped[list["Document"]] = relationship(
-        "Document",
+    # documents: Mapped[list["Document"]] = relationship(
+    #     "Document",
+    #     back_populates="user",
+    # )
+    incassos: Mapped[list["Incasso"]] = relationship(
+        "Incasso",
         back_populates="user",
     )
 
@@ -48,8 +51,8 @@ class Client(Base):
         String(2),
         nullable=False,
     )
-    incassos: Mapped[list["Incasso"]] = relationship(
-        "Incasso",
+    payments: Mapped[list["Payment"]] = relationship(
+        "Payment",
         back_populates="client",
     )
 
@@ -60,55 +63,75 @@ class Client(Base):
         return f"{self.__class__.__name__} - Code: ({self.code})"
 
 
-class TypeOfIncasso(str, Enum):
-    check = "assegno"
-    cash = "contanti"
-
-
 class Incasso(Base):
     """
-    Per incasso s'intende il singolo pagamento del cliente da apporre sulla busta
+    Per incasso s'intende il documento globale che è composto dalla lista di pagamenti
+    e dalla busta + dal pdf con l'immagine delle scansioni
     """
 
     __tablename__ = "incasso"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    type_of_payment: Mapped[TypeOfIncasso] = mapped_column(
-        SqlAlchemyEnum(TypeOfIncasso)
+    creation_date: Mapped[datetime] = mapped_column(nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="incassos",
+    )
+    payments: Mapped[list["Payment"]] = relationship(
+        "Payment",
+        back_populates="incasso",
+        cascade="all, delete-orphan",
+    )
+
+
+class TypeOfPayment(str, Enum):
+    check = "assegno"
+    cash = "contanti"
+
+
+class Payment(Base):
+    __tablename__ = "payment"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id_payment: Mapped[int] = mapped_column()
+    type_of_payment: Mapped["TypeOfPayment"] = mapped_column(
+        SqlAlchemyEnum(TypeOfPayment)
     )
     amount: Mapped[float] = mapped_column(Float, nullable=False)
 
     # FK
-    client_code: Mapped[int] = mapped_column(
-        Integer, ForeignKey("client.code", ondelete="CASCADE")
+    client_code: Mapped[int] = mapped_column(Integer, ForeignKey("client.code"))
+    incasso_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("incasso.id", ondelete="CASCADE")
     )
-    document_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("document.id", ondelete="CASCADE")
-    )
-    # Fixed relationships
+
+    # New relationship with Incasso and Client
     client: Mapped["Client"] = relationship(
         "Client",
-        back_populates="incassos",
+        back_populates="payments",
     )
-    document: Mapped["Document"] = relationship("Document", back_populates="incassos")
+    incasso: Mapped["Incasso"] = relationship("Incasso", back_populates="payments")
 
 
-class Document(Base):
-    """
-    Per documento s'intende l'oggetto in PDF che verrà generato
-    """
-
-    __tablename__ = "document"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    creation_date: Mapped[datetime] = mapped_column(DateTime)
-    # FK
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("user.id", ondelete="CASCADE")
-    )
-
-    # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="documents")
-    incassos: Mapped[list["Incasso"]] = relationship(
-        "Incasso", back_populates="document"
-    )
+# TODO: Reimplement documents when needed, also in `env.py` in alembic
+# class Document(Base):
+#     """
+#     Per documento s'intende l'oggetto in PDF che verrà generato
+#     """
+#
+#     __tablename__ = "document"
+#
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     creation_date: Mapped[datetime] = mapped_column(DateTime)
+#     # FK
+#     user_id: Mapped[int] = mapped_column(
+#         Integer, ForeignKey("user.id", ondelete="CASCADE")
+#     )
+#
+#     # Relationships
+#     user: Mapped["User"] = relationship("User", back_populates="documents")
+#     incassos: Mapped[list["Incasso"]] = relationship(
+#         "Incasso", back_populates="document"
+#     )

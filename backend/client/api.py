@@ -10,7 +10,7 @@ from fastapi import status, HTTPException
 router = APIRouter(prefix="/client", tags=["client"])
 
 
-@router.post(path="/create", response_model=ClientSchema)
+@router.post(path="/create")
 async def create_client(
     client_payload: Annotated[ClientFromForm, Form()], db: Session = Depends(get_db)
 ):
@@ -37,6 +37,7 @@ async def create_client(
         db.add(new_client)
         db.commit()
         db.refresh(new_client)
+        return {"message": "Client successfully created", "data": new_client}
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

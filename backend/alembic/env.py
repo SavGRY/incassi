@@ -30,7 +30,7 @@ if config.config_file_name is not None:
 from core.db.database import Base
 
 # this won't be referenced but NEEDS TO BE HERE to get correct models metadata
-from core.db.models import User, Client, Incasso, Document, TypeOfIncasso  # noqa: F401
+from core.db.models import User, Client, Incasso, TypeOfPayment, Payment  # noqa: F401
 
 target_metadata = Base.metadata
 
