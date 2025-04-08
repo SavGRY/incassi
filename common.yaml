@@ -9,7 +9,8 @@ services:
       - .docker/auth_opt.env
     command: >
       bash -c "
-      alembic upgrade head
+      alembic history \
+      && alembic upgrade head \
       && alembic revision --autogenerate \
       && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
