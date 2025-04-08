@@ -8,9 +8,9 @@ services:
       - .docker/pg_conf.env
       - .docker/auth_opt.env
     command: >
-      bash -c "alembic upgrade head \
+      bash -c "
+      alembic upgrade head
       && alembic revision --autogenerate \
-      && alembic upgrade head \
       && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
       - db
