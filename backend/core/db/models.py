@@ -97,7 +97,8 @@ class Payment(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     id_payment: Mapped[int] = mapped_column()
     type_of_payment: Mapped["TypeOfPayment"] = mapped_column(
-        SqlAlchemyEnum(TypeOfPayment)
+        SqlAlchemyEnum(TypeOfPayment),
+        default=TypeOfPayment.cash
     )
     amount: Mapped[float] = mapped_column(Float, nullable=False)
 
