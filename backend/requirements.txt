@@ -7,8 +7,8 @@ dnspython==2.7.0
 email_validator==2.2.0
 fastapi==0.115.12
 fastapi-cli==0.0.7
-h11==0.14.0
-httpcore==1.0.7
+h11==0.16.0
+httpcore==1.0.9
 httptools==0.6.4
 httpx==0.28.1
 idna==3.10
@@ -38,7 +38,7 @@ SQLAlchemy==2.0.40
 starlette==0.46.2
 typer==0.15.2
 typing_extensions==4.13.1
-uvicorn==0.34.0
+uvicorn==0.34.1
 uvloop==0.21.0
 watchfiles==1.0.5
 websockets==15.0.1
