@@ -15,7 +15,7 @@ router = APIRouter(prefix="/incasso", tags=["incasso"])
 
 class TypeOfMedia(str, Enum):
     SCAN = "scan"
-    PDF = "pdf"
+    ENVELOPE = "envelope"
 
 
 @router.post(path="/create", status_code=status.HTTP_201_CREATED)
@@ -54,16 +54,18 @@ async def create_incasso(
         payments=payment_to_add,
     )
     # creates the media object and assign it the correct path/filename
-
-    # db operations
-    db.add(incasso)
-    db.commit()
-    db.refresh(incasso)
-    media = create_media(incasso=incasso, type_of_media=TypeOfMedia.PDF, db=db)
+    media = create_media(incasso=incasso, type_of_media=TypeOfMedia.ENVELOPE, db=db)
 
     # generate its pdf
     incasso_pdf = generate_incasso_pdf(incasso=incasso)
     incasso_pdf.write_pdf(target=media.pdf_path)
+
+    # db operations
+    db.add(media)
+    db.add(incasso)
+    db.commit()
+    db.refresh(media)
+    db.refresh(incasso)
 
     return {
         "message": f"Incasso successfully created with {len(payment_to_add)} payments"

@@ -94,7 +94,8 @@ class Media(Base):
         Integer, ForeignKey("user.id", ondelete="CASCADE")
     )
 
-    user: Mapped["User"] = relationship("User", back_populates="documents")
+    user: Mapped["User"] = relationship("User", back_populates="media")
+    incasso: Mapped["Incasso"] = relationship("Incasso", back_populates="media")
 
 
 class Incasso(Base):
@@ -109,12 +110,15 @@ class Incasso(Base):
         nullable=False, server_default=func.now()
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    media_id: Mapped[int] = mapped_column(ForeignKey("media.id"), unique=True)
+    media_id: Mapped[int] = mapped_column(
+        ForeignKey("media.id"), unique=True, nullable=True
+    )
 
     media: Mapped[list["Media"]] = relationship(
         "Media",
         back_populates="incasso",
         cascade="all, delete-orphan",
+        single_parent=True,
     )
     user: Mapped["User"] = relationship(
         "User",
