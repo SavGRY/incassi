@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang='it'>
+<head>
+  <title>Incasso n°{{ incasso.id }}</title>
+  <style>
+      /* Set the exact dimensions of Envelope #10 */
+      @page {
+          size: 9.5in 4.125in;
+          margin: 0;
+      }
+      body {
+          outline: 1px solid black;
+          width: 9.5in;
+          height: 4.125in;
+          margin: 0;
+          padding: 0;
+          font-family: Arial, sans-serif;
+      }
+      .container {
+          display: flex;
+          flex-direction: column;
+          padding:1rem;
+      }
+      .intestazione {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+      .recipient {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-left: auto;
+          color: red;
+      }
+  </style>
+</head>
+<body>
+<div class='container'>
+  <section class='intestazione'>
+    <div class='creator'> SAVINCAR DI SAVINI ALFONSO</div>
+    <div class="recipient">
+      <span class='name'>LODI SRL</span>
+      <span class='address'>Via asdadas 14</span>
+      <span class='location'>Governolo (MN)</span>
+    </div>
+  </section>
+  <section class='date'>Incassi del {{ incasso.creation_date.strftime("%d-%m-%Y") }}</section>
+  <ul>
+    {% for payment in incasso.payments %}
+      <li>
+        <span>{{ payment.client.name | capitalize }}</span>
+        <span>{{ payment.type_of_payment | lower }}</span>
+        <span>&#8364 {{ payment.amount }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+</body>
+</html>
