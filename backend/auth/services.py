@@ -45,7 +45,7 @@ def get_user(email: str):
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with this email '{email}' not found".format(email),
+            detail="User with this email '%(email)s' not found".format(email),
         )
 
 
@@ -77,7 +77,7 @@ def create_access_token(
     return TokenData(token=encoded_jwt, expire_at=expire)
 
 
-async def get_user_by_token(token: str):
+async def get_user_by_token(token: str) -> User:
     db = next(get_db())
     user = db.query(User).filter_by(token=token).first()
     if not user:
