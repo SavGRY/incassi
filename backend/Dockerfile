@@ -6,7 +6,9 @@ COPY requirements.txt .
 
 RUN apt-get update -y && \
     apt-get upgrade -y && \
-    apt-get install -y gcc libpq-dev cargo
+    apt-get install -y gcc libpq-dev cargo && \
+    # weasyprint libs
+    apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 libjpeg-dev libopenjp2-7-dev libffi-dev
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 

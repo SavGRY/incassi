@@ -15,7 +15,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
-logger = logging.getLogger('alembic.env')
+logger = logging.getLogger("alembic.env")
 # getting the correct connection str for postgres from env or the one present to the 'alembic.ini'
 
 # setting in the alembic context, the env var for postgres connection str
@@ -33,7 +33,15 @@ if config.config_file_name is not None:
 
 # this won't be referenced but NEEDS TO BE HERE to get correct models metadata
 from core.db.database import Base
-from core.db.models import User, Client, Incasso, TypeOfPayment, Payment  # noqa: F401
+from core.db.models import (
+    User,
+    Client,
+    Incasso,
+    TypeOfPayment,
+    TypeOfMedia,
+    Payment,
+    Media,
+)  # noqa: F401
 
 target_metadata = Base.metadata
 
@@ -83,11 +91,11 @@ def run_migrations_online() -> None:
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     # https://alembic.sqlalchemy.org/en/latest/cookbook.html#don-t-generate-empty-migrations-with-autogenerate
     def process_revision_directives(context, revision, directives):
-        if getattr(config.cmd_opts, 'autogenerate', False):
+        if getattr(config.cmd_opts, "autogenerate", False):
             script = directives[0]
             if script.upgrade_ops.is_empty():
                 directives[:] = []
-                logger.info('No changes in schema detected.')
+                logger.info("No changes in schema detected.")
 
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
