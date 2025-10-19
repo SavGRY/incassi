@@ -39,7 +39,7 @@ starlette==0.48.0
 typer==0.19.2
 typing_extensions==4.15.0
 uvicorn==0.38.0
-uvloop==0.21.0
+uvloop==0.22.1
 watchfiles==1.1.1
 weasyprint==66
 websockets==15.0.1
