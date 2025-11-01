@@ -159,7 +159,6 @@ class Payment(Base):
     __tablename__ = "payment"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    id_payment: Mapped[int] = mapped_column()
     type_of_payment: Mapped["TypeOfPayment"] = mapped_column(
         SqlAlchemyEnum(TypeOfPayment),
         default=TypeOfPayment.cash,
@@ -167,6 +166,9 @@ class Payment(Base):
         nullable=False,
     )
     amount: Mapped[float] = mapped_column(Float, nullable=False)
+    creation_date: Mapped[datetime] = mapped_column(
+        nullable=False, server_default=func.now()
+    )
 
     # FK
     client_code: Mapped[int] = mapped_column(Integer, ForeignKey("client.code"))

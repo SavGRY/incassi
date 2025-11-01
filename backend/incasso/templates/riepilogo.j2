@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang='it'>
+<head>
+    <title>Incasso del {{ current_date }}</title>
+    <style>
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        header{
+            width: 100%;
+            border: 1px solid black;
+            padding: 1rem;
+        }
+        h1 {
+            text-align: center;
+        }
+        header > p {
+            font-size: .75rem;
+        }
+        header > p, h3 {
+            text-align: center;
+        }
+        header > p, h3 {
+            margin: 0
+        }
+        p#p-email {
+            margin-bottom: 1rem;
+        }
+        p#lodi {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        #images {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: .5rem;
+        }
+        #images > img {
+            max-width: 100%;
+        }
+        @page {
+            @top-center {
+                content: element(header);
+            }
+            size: A4;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class='container'>
+<header id='header'>
+    <h1 id='h1'> SAVINCAR di SAVINI ALFONSO</h1>
+    <p id='p-info'>
+        <span id='address'>Via Vittorio Veneto 75 - 41015 Nonantola (MO)</span>
+        |
+        <span id='cf'>Codice Fiscale: SVNLNS58D25A488Z</span>
+        |
+        <span id='piva'>P.IVA: 02247480367</span>
+        |
+        <span id='tel'>Tel: 3488019040</span>
+    </p>
+    <p id='p-email'>
+        <span>Email: savincar@libero.it</span>
+        |
+        <span>PEC: savincar@cert.cna.it</span>
+    </p>
+    <h3 id='sign'>FIRMA PER RICEVIMENTO ____________________</h3>
+</header>
+<p id='lodi'><strong>LODI SRL</strong> DATA: {{ current_date }}</p>
+<section id='images'>
+    {% for uri in uri_list %}
+        <img src='{{ uri }}' alt='Uploaded Image {{ loop.index }}'>
+        {% if loop.index % 4 == 0 %}
+            <p style='page-break-before: always'></p>
+        {% endif %}
+    {% endfor %}
+</section>
+</body>
+</html>
