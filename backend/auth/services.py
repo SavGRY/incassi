@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
+import bcrypt
 from auth.domain import ALGORITHM, SECRET_KEY
 from auth.schema import TokenData
 from core.db.database import get_db
@@ -10,10 +11,8 @@ from core.db.models import User
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 __all__ = [
@@ -25,16 +24,22 @@ __all__ = [
 ]
 
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password):
+# Hash a password using bcrypt
+def get_password_hash(password: str):
     if not password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Password is required"
         )
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode("utf-8")
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password=pwd_bytes, salt=salt)
+    return hashed_password
+
+
+# Check if the provided password matches the stored password (hashed)
+def verify_password(plain_password, hashed_password):
+    password_byte_enc = plain_password.encode("utf-8")
+    return bcrypt.checkpw(password=password_byte_enc, hashed_password=hashed_password)
 
 
 def get_user(email: str):
@@ -45,7 +50,7 @@ def get_user(email: str):
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User with this email '%(email)s' not found".format(email),
+            detail="User with this email '%(email)s' not found",
         )
 
 
