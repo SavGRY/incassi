@@ -1,7 +1,7 @@
 import {HttpErrorResponse, HttpEvent, HttpInterceptorFn} from '@angular/common/http';
 import {inject} from '@angular/core';
 import {Router} from '@angular/router';
-import {Observable, catchError} from 'rxjs';
+import {catchError, Observable} from 'rxjs';
 
 /**
  * Method that Identifies and handles a given HTTP req.

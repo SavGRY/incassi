@@ -1,8 +1,7 @@
 import {provideHttpClient} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {type ComponentFixture, TestBed} from '@angular/core/testing';
-import {ActivatedRoute, UrlTree} from '@angular/router';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router, UrlTree} from '@angular/router';
 import {EMPTY} from 'rxjs';
 import {LoginComponent} from './login.component';
 

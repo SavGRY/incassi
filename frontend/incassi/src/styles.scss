@@ -1,2 +1,9 @@
-@use "tailwindcss";
+@use './assets/fontawesome/css/all.css';
 @custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/Raleway-VariableFont_wght.ttf') format('truetype');
+}

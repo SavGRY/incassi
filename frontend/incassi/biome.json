@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -8,26 +8,36 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [
-      "package.json",
-      "*-lock.json",
-      "dist",
-      "src/assets/**",
-      "tsconfig.*",
-      "karma.conf.js",
-      ".angular/",
-      "node_modules/",
-      "src/environments/",
-      "coverage/"
+    "includes": [
+      "**",
+      "!!**/package.json",
+      "!!**/*-lock.json",
+      "!!**/dist",
+      "!!**/src/assets",
+      "!!**/tsconfig.*",
+      "!!**/karma.conf.js",
+      "!!**/.angular",
+      "!!**/node_modules",
+      "!!**/src/environments",
+      "!!**/coverage"
     ]
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "lineWidth": 120
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf"
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "recommended": true,
+      "source": {
+        "organizeImports": "on",
+        "recommended": true
+      }
+    }
   },
   "linter": {
     "enabled": true,
@@ -48,6 +58,15 @@
       "semicolons": "always",
       "indentWidth": 2,
       "trailingCommas": "es5"
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "parser": {
+      "interpolation": true
     }
   },
   "json": {
