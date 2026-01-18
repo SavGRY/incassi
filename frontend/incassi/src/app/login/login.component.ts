@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, type OnDestroy, type Signal, computed, inject} from '@angular/core';
+import {Component, computed, inject, type OnDestroy, type Signal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {
   type AbstractControl,
