@@ -1,0 +1,80 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false,
+    "defaultBranch": "main"
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!!**/package.json",
+      "!!**/*-lock.json",
+      "!!**/dist",
+      "!!**/src/assets",
+      "!!**/tsconfig.*",
+      "!!**/karma.conf.js",
+      "!!**/.angular",
+      "!!**/node_modules",
+      "!!**/src/environments",
+      "!!**/coverage"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf"
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "recommended": true,
+      "source": {
+        "organizeImports": "on",
+        "recommended": true
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "useImportType": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "quoteStyle": "single",
+      "lineWidth": 120,
+      "bracketSpacing": false,
+      "lineEnding": "lf",
+      "semicolons": "always",
+      "indentWidth": 2,
+      "trailingCommas": "es5"
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "parser": {
+      "interpolation": true
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true,
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "trailingCommas": "none"
+    }
+  }
+}
