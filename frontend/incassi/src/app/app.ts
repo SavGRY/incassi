@@ -10,9 +10,4 @@ import {Button} from 'primeng/button';
 })
 export class App {
   protected readonly title = signal('incassi');
-
-  toggleDarkMode() {
-    const element = document.querySelector('html')!;
-    element.classList.toggle('dark-mode');
-  }
 }
