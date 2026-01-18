@@ -1,5 +1,8 @@
 @use './assets/fontawesome/css/all.css';
-@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  font-family: 'Raleway', sans-serif;
+}
 
 @font-face {
   font-family: 'Raleway';

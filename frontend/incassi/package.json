@@ -1,45 +1,44 @@
 {
-	"name": "incassi",
-	"version": "0.0.0",
-	"scripts": {
-		"ng": "ng",
-		"start": "ng serve --host 0.0.0.0 --public-host ${VIRTUAL_HOST-localhost} --poll=500",
-		"build": "ng build",
-		"watch": "ng build --watch --configuration development",
-		"test": "ng test"
-	},
-	"private": true,
-	"dependencies": {
-		"@angular/animations": "^21.0.0",
-		"@angular/cdk": "^21.0.0",
-		"@angular/common": "^21.0.0",
-		"@angular/compiler": "^21.0.0",
-		"@angular/core": "^21.0.0",
-		"@angular/forms": "^21.0.0",
-		"@angular/material": "^21.0.0",
-		"@angular/platform-browser": "^21.0.0",
-		"@angular/platform-browser-dynamic": "^21.0.0",
-		"@angular/router": "^21.0.0",
-		"postcss": "^8.5.2",
-		"rxjs": "~7.8.0",
-		"tslib": "^2.3.0",
-		"zone.js": "~0.15.0"
-	},
-	"devDependencies": {
-		"@angular-devkit/build-angular": "^21.0.0",
-		"@angular/cli": "^21.0.0",
-		"@angular/compiler-cli": "^21.0.0",
-		"@biomejs/biome": "2.3.5",
-		"@types/jasmine": "~5.1.0",
-		"jasmine-core": "~5.12.0",
-		"karma": "~6.4.0",
-		"karma-chrome-launcher": "~3.2.0",
-		"karma-coverage": "~2.2.0",
-		"karma-firefox-launcher": "~2.1.2",
-		"karma-jasmine": "~5.1.0",
-		"karma-jasmine-html-reporter": "~2.1.0",
-		"karma-junit-reporter": "~2.0.1",
-		"karma-spec-reporter": "~0.0.36",
-		"typescript": "~5.9.0"
-	}
+  "name": "incassi",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --host 0.0.0.0 --poll 2000",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "dependencies": {
+    "@angular/common": "^21.1.0",
+    "@angular/compiler": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@angular/forms": "^21.1.0",
+    "@angular/platform-browser": "^21.1.0",
+    "@angular/router": "^21.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.1.0",
+    "@angular/cli": "^21.1.0",
+    "@angular/compiler-cli": "^21.1.0",
+    "@biomejs/biome": "2.3.11",
+    "jsdom": "^27.1.0",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
 }
