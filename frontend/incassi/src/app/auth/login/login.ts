@@ -2,13 +2,11 @@ import {CommonModule} from '@angular/common';
 import {Component, computed, inject, type OnDestroy, type Signal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {
-  type AbstractControl,
   FormControl,
   type FormControlStatus,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  type ValidationErrors,
   Validators,
 } from '@angular/forms';
 import {Router} from '@angular/router';
@@ -29,20 +27,18 @@ export class Login implements OnDestroy {
   private readonly authService: Auth = inject(Auth);
   private subscription: Subscription = new Subscription();
 
-  emailDomainValidator(control: AbstractControl): ValidationErrors | null {
-    const email = control.value;
-    // get the domain from the email
-    // the angular validator doesn't allow to use the email validator with a custom validator
-    const domain: string = email.split('@')[1];
-    // if the email is not valid, return the error
-    if (!email) return null;
-    return domain ? null : {invalidDomain: true};
-  }
-
   loginForm: FormGroup = new FormGroup({
-    email: new FormControl('', [this.emailDomainValidator, Validators.required]),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
+    ]),
     password: new FormControl('', [Validators.required]),
   });
+
+  private formStatusSignal: Signal<FormControlStatus> = toSignal(this.loginForm.statusChanges, {
+    initialValue: 'INVALID',
+  });
+  isFormValid = computed((): boolean => this.formStatusSignal() === 'VALID');
 
   get email() {
     return this.loginForm.get('email');
@@ -51,9 +47,6 @@ export class Login implements OnDestroy {
   get password() {
     return this.loginForm.get('password');
   }
-
-  formStatusSignal: Signal<FormControlStatus> = toSignal(this.loginForm.statusChanges, {initialValue: 'INVALID'});
-  isFormValid = computed((): boolean => this.formStatusSignal() === 'VALID');
 
   onLogin(): void {
     this.subscription.add(
