@@ -4,6 +4,8 @@ from typing import Annotated
 
 import jwt
 import bcrypt
+from passlib.context import CryptContext
+
 from auth.domain import ALGORITHM, SECRET_KEY
 from auth.schema import TokenData
 from core.db.database import get_db
@@ -11,11 +13,17 @@ from core.db.models import User
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 __all__ = [
+    "authenticate_user",
+    "create_access_token",
+    "check_user_already_registered",
+    "validate_email",
     "verify_password",
     "get_password_hash",
     "get_user",
@@ -24,8 +32,7 @@ __all__ = [
 ]
 
 
-# Hash a password using bcrypt
-def get_password_hash(password: str):
+def get_password_hash(password):
     if not password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Password is required"
@@ -37,9 +44,15 @@ def get_password_hash(password: str):
 
 
 # Check if the provided password matches the stored password (hashed)
-def verify_password(plain_password, hashed_password):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     password_byte_enc = plain_password.encode("utf-8")
-    return bcrypt.checkpw(password=password_byte_enc, hashed_password=hashed_password)
+    clean_hex = hashed_password.replace(r"\x", "")
+    try:
+        real_hash_bytes = bytes.fromhex(clean_hex)
+    except ValueError:
+        # Fallback: se per caso il DB restituisce l'hash già pulito ($2b$...), lo codifichiamo normalmente
+        real_hash_bytes = hashed_password.encode("utf-8")
+    return bcrypt.checkpw(password=password_byte_enc, hashed_password=real_hash_bytes)
 
 
 def get_user(email: str):
@@ -55,7 +68,9 @@ def get_user(email: str):
 
 
 def authenticate_user(email: str, password: str, db: Session):
-    user = db.query(User).filter(User.email == email).first()
+    # Todo: si ma c'è un  constraint sulla mail? Se si registrano + utenti con la stessa email?
+    stmt = select(User).where(User.email == email)
+    user = db.scalar(stmt)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"

@@ -59,9 +59,13 @@
                         Forgot your password?</a>
                 </div>
             </div>
-            <button pButton class='w-full py-2 rounded-lg flex justify-center items-center gap-2'>
-                <i pButtonIcon class='pi pi-user text-base! leading-normal!'></i>
-                <span pButtonLabel>Sign In</span>
+            <button
+                pButton
+                [disabled]='!isFormValid()'
+                [ngClass]="!isFormValid() ? '!cursor-not-allowed' : '' "
+                class='w-full py-2 rounded-lg flex justify-center items-center gap-2'>
+                    <i pButtonIcon class='pi pi-user text-base! leading-normal!'></i>
+                    <span pButtonLabel>Sign In</span>
             </button>
         </div>
     </div>
