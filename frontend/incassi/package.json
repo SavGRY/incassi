@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@angular/build": "^21.1.0",
-    "@angular/cli": "^21.1.0",
+    "@angular/cli": "^21.1.4",
     "@angular/compiler-cli": "^21.1.0",
     "@biomejs/biome": "2.3.11",
     "jsdom": "^27.1.0",
