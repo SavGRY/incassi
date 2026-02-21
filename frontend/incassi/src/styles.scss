@@ -1,2 +1,16 @@
+@use './assets/fontawesome/css/all.css';
 @use "tailwindcss";
+@plugin 'tailwindcss-primeui';
 @custom-variant dark (&:where(.dark, .dark *));
+@layer tailwind, primeng;
+
+html {
+  font-family: 'Raleway', sans-serif;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/Raleway-VariableFont_wght.ttf') format('truetype');
+}

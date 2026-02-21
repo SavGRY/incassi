@@ -26,8 +26,8 @@ async def register_user(payload: UserFromForm, db: Session = Depends(get_db)):
     check_user_already_registered(payload.email)
 
     access_token_obj: TokenData = create_access_token(data=dict(payload))
-    hashed_password: str = get_password_hash(password=payload.password)
-
+    password = payload.password.strip()
+    hashed_password: str = get_password_hash(password=password)
     try:
         new_user: User = User(
             email=payload.email,
@@ -39,7 +39,8 @@ async def register_user(payload: UserFromForm, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_user)
         return {
-            "message": f"User with email {new_user.email} has been successfully created"
+            "message": f"User with email {new_user.email} has been successfully created",
+            "token_info": access_token_obj,
         }
     except Exception as e:
         raise HTTPException(
@@ -80,5 +81,4 @@ async def logout(token: str, db: Session = Depends(get_db)):
 
     user.is_active = False
     db.commit()
-    db.refresh(user)
     return {"message": "Logout successful"}

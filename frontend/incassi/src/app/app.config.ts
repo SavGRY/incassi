@@ -1,18 +1,23 @@
-import {type ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
-import {provideRouter} from '@angular/router';
-
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
-import {provideAnimations} from '@angular/platform-browser/animations';
-import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
-import {authInterceptor} from '../shared/interceptor/auth.interceptor';
+import {ApplicationConfig, provideBrowserGlobalErrorListeners} from '@angular/core';
+import {provideRouter} from '@angular/router';
+import {providePrimeNG} from 'primeng/config';
+import {CustomTheme} from '../CustomTheme';
 import {routes} from './app.routes';
+import {authInterceptor} from './services/interceptor/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({eventCoalescing: true}),
+    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideAnimationsAsync(),
     provideHttpClient(withInterceptors([authInterceptor])),
-    provideAnimations(),
+    providePrimeNG({
+      theme: {
+        preset: CustomTheme,
+        options: {
+          darkModeSelector: '.dark',
+        },
+      },
+    }),
   ],
 };

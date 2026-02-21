@@ -1,0 +1,11 @@
+// tutto tranne le icone di FontAwesome
+*:not(.fa) {
+  font-family: 'Raleway', sans-serif;
+}
+
+.bottom-nav-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
