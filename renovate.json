@@ -10,6 +10,7 @@
     {
       "groupName": "Node Modules",
       "matchDatasources": ["npm"],
+      "rangeStrategy": "update-lockfile",
       "schedule": ["on the first day of the week"]
     }
   ]
