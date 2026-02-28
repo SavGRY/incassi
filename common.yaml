@@ -1,9 +1,7 @@
 services:
 
   fastapi:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: savgry/incassi-backend:latest
     env_file:
       - .docker/pg_conf.env
       - .docker/auth_opt.env
@@ -18,9 +16,7 @@ services:
     restart: unless-stopped
 
   web:
-    build:
-      context: ./frontend/incassi
-      dockerfile: Dockerfile
+    image: savgry/incassi-frontend:latest
     restart: unless-stopped
 
   db:

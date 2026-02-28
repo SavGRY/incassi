@@ -16,8 +16,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v6
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    - name: Docker Login and Docker Buildx
+      uses: ./.github/actions/docker-login
+      with:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Setup env and symlink
       run: |
@@ -29,13 +32,14 @@ jobs:
         ln -s common.yaml docker-compose.yaml && \
         ln -s devel.yaml docker-compose.override.yaml
 
-
     - name: Check Alembic Migration
       run: |
+        docker compose pull fastapi db && \
         docker compose up -d db && \
         docker compose run --rm --remove-orphans fastapi bash -c "mv alembic.ini.example alembic.ini && alembic upgrade head"
 
-    - name: Build and Test Backend
+    - name: Test Backend
       run: |
+        docker compose pull fastapi db && \
         docker compose up -d db && \
         docker compose run --rm --remove-orphans fastapi pytest .
