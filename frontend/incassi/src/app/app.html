@@ -1,3 +1,13 @@
-<h1>app works!</h1>
-<p-button label="Toggle Dark Mode" (onClick)="toggleDarkMode()"/>
-<router-outlet></router-outlet>
+<div class='container'>
+  <div class='flex justify-between items-center'>
+    <h1 class=''>Ciao tuo nome </h1>
+    <p-button
+      class=''
+      icon='fa'
+      [outlined]='true'
+      [rounded]='true'
+      [class]="isDarkMode() ? 'fa-moon' : 'fa-sun-bright'" (onClick)='toggleDarkMode()'
+    />
+  </div>
+  <router-outlet></router-outlet>
+</div>
