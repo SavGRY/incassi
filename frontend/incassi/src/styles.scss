@@ -5,9 +5,9 @@
 
 @plugin 'tailwindcss-primeui';
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark-mode, .dark-mode *));
 
-@layer base, tailwind, primeng;
+@layer tailwind, primeng, base;
 
 html {
   font-family: 'Raleway', sans-serif;
