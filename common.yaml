@@ -1,30 +1,26 @@
 services:
 
-  fastapi:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    env_file:
-      - .docker/pg_conf.env
-      - .docker/auth_opt.env
-    command: >
-      bash -c "
-      alembic history \
-      && alembic upgrade head \
-      && alembic revision --autogenerate \
-      && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload"
-    depends_on:
-      - db
-    restart: unless-stopped
+    fastapi:
+        image: savgry/incassi-backend:latest
+        env_file:
+            - .docker/pg_conf.env
+            - .docker/auth_opt.env
+        command: >
+            bash -c "
+            alembic history \
+            && alembic upgrade head \
+            && alembic revision --autogenerate \
+            && uvicorn core.main:app --host 0.0.0.0 --port 8000 --reload"
+        depends_on:
+            - db
+        restart: unless-stopped
 
-  web:
-    build:
-      context: ./frontend/incassi
-      dockerfile: Dockerfile
-    restart: unless-stopped
+    web:
+        image: savgry/incassi-frontend:latest
+        restart: unless-stopped
 
-  db:
-    image: postgres:16.3-alpine3.20
-    env_file:
-      - .docker/pg_conf.env
-    restart: unless-stopped
+    db:
+        image: postgres:16.3-alpine3.20
+        env_file:
+            - .docker/pg_conf.env
+        restart: unless-stopped
