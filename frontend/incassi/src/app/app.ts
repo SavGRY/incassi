@@ -1,5 +1,5 @@
 import {isPlatformBrowser} from '@angular/common';
-import {Component, DOCUMENT, effect, inject, PLATFORM_ID, signal} from '@angular/core';
+import {Component, DOCUMENT, inject, PLATFORM_ID, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {Button} from 'primeng/button';
 
@@ -15,34 +15,19 @@ export class App {
   private platformId = inject(PLATFORM_ID); // Ci serve per capire se siamo nel browser
 
   isDarkMode = signal(false);
+  isBrowser: boolean = isPlatformBrowser(this.platformId);
+  htmlEl: HTMLElement = this.document.documentElement;
 
   constructor() {
-    if (isPlatformBrowser(this.platformId)) {
-      const savedTheme = localStorage.getItem('theme');
-      // Se l'utente aveva salvato 'dark', aggiorniamo il Signal
-      if (savedTheme === 'dark') {
-        this.isDarkMode.set(true);
-      }
+    if (this.isBrowser) {
+      if (localStorage.getItem('theme') === 'dark') this.isDarkMode.set(true);
     }
-
-    effect(() => {
-      const darkMode = this.isDarkMode();
-      const htmlEl = this.document.documentElement;
-
-      if (darkMode) {
-        htmlEl.classList.add('dark-mode');
-      } else {
-        htmlEl.classList.remove('dark-mode');
-      }
-
-      // se sono nel browser salvo la preferenza
-      if (isPlatformBrowser(this.platformId)) {
-        localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-      }
-    });
+    this.isDarkMode() ? this.htmlEl.classList.add('dark-mode') : this.htmlEl.classList.remove('dark-mode');
   }
 
   toggleDarkMode() {
     this.isDarkMode.update((current) => !current);
+    this.htmlEl.classList.toggle('dark-mode');
+    if (this.isBrowser) localStorage.setItem('theme', this.isDarkMode() ? 'dark' : 'light');
   }
 }

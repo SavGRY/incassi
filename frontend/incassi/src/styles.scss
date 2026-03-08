@@ -1,8 +1,13 @@
 @use './assets/fontawesome/css/all.css';
 @use "tailwindcss";
+@use 'scss-override/base-layer.scss' as base;
+@use 'scss-override/utility' as utility;
+
 @plugin 'tailwindcss-primeui';
+
 @custom-variant dark (&:where(.dark, .dark *));
-@layer tailwind, primeng;
+
+@layer base, tailwind, primeng;
 
 html {
   font-family: 'Raleway', sans-serif;

@@ -1,0 +1,10 @@
+@utility container {
+  margin-inline: auto;
+  padding: 1rem;
+  @variant sm {
+    padding-inline: 1.5rem;
+  }
+  @variant lg {
+    padding-inline: 2rem;
+  }
+}
