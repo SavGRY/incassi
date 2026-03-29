@@ -26,7 +26,7 @@
     "@angular/build": "^21.1.0",
     "@angular/cli": "^21.1.5",
     "@angular/compiler-cli": "^21.1.0",
-    "@biomejs/biome": "2.4.8",
+    "@biomejs/biome": "2.4.9",
     "jsdom": "^28.0.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
