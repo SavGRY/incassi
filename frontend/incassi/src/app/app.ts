@@ -2,10 +2,11 @@ import {isPlatformBrowser} from '@angular/common';
 import {Component, DOCUMENT, inject, PLATFORM_ID, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {Button} from 'primeng/button';
+import {ItemSection} from './item-section/item-section';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Button],
+  imports: [RouterOutlet, Button, ItemSection],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -17,6 +18,8 @@ export class App {
   isDarkMode = signal(false);
   isBrowser: boolean = isPlatformBrowser(this.platformId);
   htmlEl: HTMLElement = this.document.documentElement;
+
+  itemTypeList = ['incassi', 'resi', 'recenti'];
 
   constructor() {
     if (this.isBrowser) {
