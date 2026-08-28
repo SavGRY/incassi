@@ -1,7 +1,7 @@
 import {isPlatformBrowser} from '@angular/common';
 import {Component, DOCUMENT, inject, PLATFORM_ID, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
-import {Button} from 'primeng/button';
+import {Button} from '@openng/optimus-ui/button';
 
 @Component({
   selector: 'app-root',

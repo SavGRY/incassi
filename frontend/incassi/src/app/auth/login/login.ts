@@ -10,8 +10,8 @@ import {
   Validators,
 } from '@angular/forms';
 import {Router} from '@angular/router';
-import {ButtonDirective, ButtonIcon, ButtonLabel} from 'primeng/button';
-import {InputText} from 'primeng/inputtext';
+import {ButtonDirective, ButtonIcon, ButtonLabel} from '@openng/optimus-ui/button';
+import {InputText} from '@openng/optimus-ui/inputtext';
 import {Subscription} from 'rxjs';
 import type {LoginResponse} from '../../models/Auth';
 import {Auth} from '../../services/auth';

@@ -3,7 +3,7 @@
 @use 'scss-override/base-layer.scss' as base;
 @use 'scss-override/utility' as utility;
 
-@plugin 'tailwindcss-primeui';
+@plugin '@openng/optimus-ui-tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
