@@ -40,6 +40,6 @@ typer==0.27.2
 typing_extensions==4.16.0
 uvicorn==0.52.4
 uvloop==0.22.1
-watchfiles==1.1.1
+watchfiles==1.2.0
 weasyprint==69.0
 websockets==17.1
