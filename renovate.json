@@ -12,6 +12,10 @@
       "matchDatasources": ["npm"],
       "rangeStrategy": "update-lockfile",
       "schedule": ["on the first day of the week"]
+    },
+    {
+      "groupName": "Pydantic",
+      "matchPackageNames": ["pydantic", "pydantic-core"]
     }
   ]
 }
