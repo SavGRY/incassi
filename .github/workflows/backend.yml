@@ -14,28 +14,35 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v4
 
     - name: Setup env and symlink
+      env:
+        DB_STR: ${{ secrets.DB_CONNECTION_STR }}
+        AUTH_ALG: ${{ secrets.AUTH_ALGORITHM }}
+        AUTH_SEC: ${{ secrets.AUTH_SECRET }}
       run: |
-        mv .docker/pg_conf.env.example .docker/pg_conf.env && \
-        mv .docker/auth_opt.env.example .docker/auth_opt.env && \
-        sed -i "s|POSTGRES_CONNECTION_STR=\"[^\"]*\"|POSTGRES_CONNECTION_STR=\"${{ secrets.DB_CONNECTION_STR }}\"|" .docker/pg_conf.env && \
-        sed -i "s|ALGORITHM=\"[^\"]*\"|ALGORITHM=\"${{ secrets.AUTH_ALGORITHM }}\"|" .docker/auth_opt.env && \
-        sed -i "s|SECRET_KEY=\"[^\"]*\"|SECRET_KEY=\"${{ secrets.AUTH_SECRET }}\"|" .docker/auth_opt.env && \
-        ln -s common.yaml docker-compose.yaml && \
+        mv .docker/pg_conf.env.example .docker/pg_conf.env
+        mv .docker/auth_opt.env.example .docker/auth_opt.env
+        sed -i "s|POSTGRES_CONNECTION_STR=\"[^\"]*\"|POSTGRES_CONNECTION_STR=\"$DB_STR\"|" .docker/pg_conf.env
+        sed -i "s|ALGORITHM=\"[^\"]*\"|ALGORITHM=\"$AUTH_ALG\"|" .docker/auth_opt.env
+        sed -i "s|SECRET_KEY=\"[^\"]*\"|SECRET_KEY=\"$AUTH_SEC\"|" .docker/auth_opt.env
+        ln -s common.yaml docker-compose.yaml
         ln -s devel.yaml docker-compose.override.yaml
 
+    - name: Build and Start Database
+      run: |
+        docker compose build fastapi
+        docker compose up -d db
+        until docker compose exec db pg_isready; do sleep 1; done
 
     - name: Check Alembic Migration
       run: |
-        docker compose up -d db && \
         docker compose run --rm --remove-orphans fastapi bash -c "mv alembic.ini.example alembic.ini && alembic upgrade head"
 
-    - name: Build and Test Backend
+    - name: Run Tests
       run: |
-        docker compose up -d db && \
         docker compose run --rm --remove-orphans fastapi pytest .
