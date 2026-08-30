@@ -7,7 +7,7 @@ RUN apk update &&\
     apk upgrade --no-cache &&\
     apk add --no-cache g++ gcc libgcc libstdc++ linux-headers make python3 firefox py3-pip
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm install
 

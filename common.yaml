@@ -1,6 +1,8 @@
 services:
 
     fastapi:
+        build:
+            context: ./backend
         image: savgry/incassi-backend:latest
         env_file:
             - .docker/pg_conf.env
@@ -16,6 +18,8 @@ services:
         restart: unless-stopped
 
     web:
+        build:
+            context: ./frontend/incassi
         image: savgry/incassi-frontend:latest
         restart: unless-stopped
 
