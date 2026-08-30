@@ -21,7 +21,6 @@
     ]
   },
   "private": true,
-  "packageManager": "npm@11.12.1",
   "dependencies": {
     "@angular/common": "^22.1.4",
     "@angular/compiler": "^22.1.4",
@@ -29,14 +28,15 @@
     "@angular/forms": "^22.1.4",
     "@angular/platform-browser": "^22.1.4",
     "@angular/router": "^22.1.4",
+    "@openng/icons": "^1.0.0",
     "@openng/optimus-ui": "^2.0.2",
+    "@openng/optimus-ui-tailwindcss": "^2.0.2",
+    "@openng/optimus-ui-themes": "^2.0.2",
     "@tailwindcss/postcss": "^4.1.18",
     "postcss": "^8.5.26",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.1.18",
-    "tslib": "^2.3.0",
-    "@openng/optimus-ui-themes": "^2.0.2",
-    "@openng/optimus-ui-tailwindcss": "^2.0.2"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/build": "^22.1.6",
