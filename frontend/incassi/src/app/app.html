@@ -1,5 +1,5 @@
 <div class='container'>
-  <div class='flex justify-between items-center'>
+  <div class='flex justify-between items-center mb-5'>
     <h1 class=''>Ciao tuo nome </h1>
     <p-button
       class=''
@@ -9,5 +9,8 @@
       [class]="isDarkMode() ? 'fa-moon' : 'fa-sun-bright'" (onClick)='toggleDarkMode()'
     />
   </div>
+  @for (item of itemTypeList; track $index) {
+    <app-item-section [title]="item"></app-item-section>
+  }
   <router-outlet></router-outlet>
 </div>
