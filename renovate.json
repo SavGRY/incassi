@@ -1,21 +1,47 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
   "packageRules": [
     {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+    {
       "groupName": "Containers",
-      "matchDatasources": ["docker"],
-      "schedule": ["on the first day of the week"]
+      "matchDatasources": [
+        "docker"
+      ],
+      "schedule": [
+        "on the first day of the week"
+      ]
     },
     {
       "groupName": "Node Modules",
-      "matchDatasources": ["npm"],
+      "matchDatasources": [
+        "npm"
+      ],
       "rangeStrategy": "update-lockfile",
-      "schedule": ["on the first day of the week"]
+      "schedule": [
+        "on the first day of the week"
+      ]
     },
     {
       "groupName": "Pydantic",
-      "matchPackageNames": ["pydantic", "pydantic-core"]
+      "matchPackageNames": [
+        "pydantic",
+        "pydantic-core"
+      ]
     }
   ]
 }
