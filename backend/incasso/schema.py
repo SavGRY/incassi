@@ -1,7 +1,7 @@
 from typing import Any
 from enum import Enum
 
-from pydantic import BaseModel, model_validator
+from pydantic import ConfigDict, BaseModel, model_validator
 from pydantic_core import from_json
 
 
@@ -43,8 +43,7 @@ class PaymentFromForm(BaseModel):
     type_of_payment: TypeOfPaymentEnum
     amount: float
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PaymentListModel(JsonStringModel):
@@ -58,5 +57,4 @@ class Payment(BaseModel):
     document_id: int
     client_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
