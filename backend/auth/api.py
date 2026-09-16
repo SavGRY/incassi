@@ -25,7 +25,9 @@ async def register_user(payload: UserFromForm, db: Session = Depends(get_db)):
     validate_email(payload.email)
     check_user_already_registered(payload.email)
 
-    access_token_obj: TokenData = create_access_token(data=dict(payload))
+    # Never put the password in the token payload: a JWT is signed, not encrypted,
+    # so anyone able to read it could base64-decode the credentials.
+    access_token_obj: TokenData = create_access_token(data={"sub": payload.email})
     password = payload.password.strip()
     hashed_password: str = get_password_hash(password=password)
     try:
