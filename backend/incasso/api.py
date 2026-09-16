@@ -3,7 +3,16 @@ import os
 import zipfile
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 from starlette.responses import FileResponse, Response
 
@@ -141,7 +150,10 @@ def create_media(
     response_description="The generated incasso pdf",
 )
 async def download_incasso(
-    incasso_id: int, db: Session = Depends(get_db), type_of_download: str = ""
+    request: Request,
+    incasso_id: int,
+    db: Session = Depends(get_db),
+    type_of_download: str = "",
 ):
     possible_values = (v.value for v in TypeOfMedia)
     if type_of_download not in possible_values:
@@ -149,6 +161,17 @@ async def download_incasso(
             status_code=404,
             detail=f"Type of download {type_of_download} not found",
         )
+
+    # The incasso must belong to the caller, otherwise anyone authenticated
+    # could download everybody else's documents by guessing an id.
+    user: User = request.state.user
+    incasso = (
+        db.query(Incasso)
+        .filter(Incasso.id == incasso_id, Incasso.user_id == user.id)
+        .first()
+    )
+    if not incasso:
+        raise HTTPException(status_code=404, detail="Incasso not found")
 
     media_list = (
         db.query(Media)
