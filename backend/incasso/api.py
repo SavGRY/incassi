@@ -27,7 +27,7 @@ async def create_incasso(
     list_of_images: list[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
-    user = await get_user_by_token(token)
+    user = get_user_by_token(token)
 
     payment_to_add = []
     # mapping of client code and related client in db
