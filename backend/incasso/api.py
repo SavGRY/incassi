@@ -155,8 +155,11 @@ async def download_incasso(
     db: Session = Depends(get_db),
     type_of_download: str = "",
 ):
-    possible_values = (v.value for v in TypeOfMedia)
-    if type_of_download not in possible_values:
+    # The column stores the enum *member*, so the raw string has to be resolved
+    # first: comparing the column against a bare value raises a LookupError.
+    try:
+        media_type = TypeOfMedia(type_of_download)
+    except ValueError:
         raise HTTPException(
             status_code=404,
             detail=f"Type of download {type_of_download} not found",
@@ -175,7 +178,7 @@ async def download_incasso(
 
     media_list = (
         db.query(Media)
-        .where(Media.type_of_media == type_of_download, Media.incasso_id == incasso_id)
+        .where(Media.type_of_media == media_type, Media.incasso_id == incasso_id)
         .all()
     )
 
