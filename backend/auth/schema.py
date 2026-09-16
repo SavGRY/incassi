@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 from datetime import datetime
 
 
@@ -10,8 +10,7 @@ class User(BaseModel):
     is_active: bool
     full_name: str | None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserFromForm(BaseModel):
@@ -28,8 +27,7 @@ class UserInDB(BaseModel):
     is_active: bool
     full_name: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Token(BaseModel):

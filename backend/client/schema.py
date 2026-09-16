@@ -1,16 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Client(BaseModel):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+    # The primary key of the `Client` model is `code`: there is no `id` column.
     name: str
     code: int
-    address: str
+    address: str | None
     city: str
     province: str
-
-    class Config:
-        orm_mode = True
 
 
 class ClientFromForm(BaseModel):
