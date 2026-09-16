@@ -52,7 +52,7 @@ def create_login_middleware():
             # Extract the token
             token = auth_header.removeprefix("Token ")
             # Validate token and get user
-            user = await get_user_by_token(token)
+            user = get_user_by_token(token)
 
             # Add user to request state
             request.state.user = user
@@ -85,7 +85,7 @@ def create_already_authenticated_middleware():
             # Check if user is already authenticated via token
             auth_header = request.headers["Authorization"]
             token = auth_header.removeprefix("Token ")
-            user = await get_user_by_token(token=token)
+            user = get_user_by_token(token=token)
             if not is_token_linked_to_correct_user(token=token, email=user.email):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,

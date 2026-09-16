@@ -97,7 +97,7 @@ def create_access_token(
     return TokenData(token=encoded_jwt, expire_at=expire)
 
 
-async def get_user_by_token(token: str) -> User:
+def get_user_by_token(token: str) -> User:
     db = next(get_db())
     user = db.query(User).filter_by(token=token).first()
     if not user:

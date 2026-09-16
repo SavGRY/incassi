@@ -77,7 +77,7 @@ async def logout(token: str, db: Session = Depends(get_db)):
     if not token:
         raise HTTPException(status_code=401, detail="No token found")
 
-    user = await get_user_by_token(token)
+    user = get_user_by_token(token)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
