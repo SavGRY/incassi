@@ -150,27 +150,34 @@ async def download_incasso(
             detail=f"Type of download {type_of_download} not found",
         )
 
-    media = db.query(Media).where(
-        Media.type_of_media == type_of_download, Media.incasso_id == incasso_id
+    media_list = (
+        db.query(Media)
+        .where(Media.type_of_media == type_of_download, Media.incasso_id == incasso_id)
+        .all()
     )
 
-    if not media:
-        raise HTTPException(status_code=404, detail="No file fonud for this incasso")
+    if not media_list:
+        raise HTTPException(status_code=404, detail="No file found for this incasso")
 
-    if media.count() > 1:
+    if len(media_list) > 1:
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            for m in media.all():
-                f = open(m.pdf_path)
-                name = m.pdf_path.split("/")[-1]
-                zip_file.writestr(name, f.read())
+            for m in media_list:
+                name = os.path.basename(m.pdf_path)
+                with open(m.pdf_path, "rb") as f:
+                    zip_file.writestr(name, f.read())
 
         return Response(
             content=buffer.getvalue(),
             media_type="application/zip",
+            headers={
+                "Content-Disposition": f'attachment; filename="incasso_{incasso_id}.zip"'
+            },
         )
 
-    file_name = media.pdf_path.split("/")[-1]
+    media = media_list[0]
     return FileResponse(
-        path=media.pdf_path, filename=file_name, media_type="application/pdf"
+        path=media.pdf_path,
+        filename=os.path.basename(media.pdf_path),
+        media_type="application/pdf",
     )
