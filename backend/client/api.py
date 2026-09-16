@@ -6,7 +6,6 @@ from core.db.models import Client
 from client.schema import Client as ClientSchema, ClientFromForm
 from fastapi import status, HTTPException
 
-
 router = APIRouter(prefix="/client", tags=["client"])
 
 
@@ -138,13 +137,20 @@ async def update_client(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Client with code {client_code} not found",
         )
-    client = Client(
-        code=client_payload.code,
-        name=client_payload.name,
-        address=client_payload.address,
-        province=client_payload.province,
-        city=client_payload.city,
-    )
+    client.code = client_payload.code
+    client.name = client_payload.name
+    client.address = client_payload.address
+    client.province = client_payload.province
+    client.city = client_payload.city
+    try:
+        db.commit()
+        db.refresh(client)
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="A critical error occurred",
+        )
     return {
         "message": f"Client {client_code} has been successfully updated!",
         "client": client,
