@@ -2,6 +2,7 @@ import logging
 
 from core.domain import API_PREFIX
 from fastapi import Request, HTTPException
+from fastapi.responses import JSONResponse
 from auth.services import is_token_linked_to_correct_user, get_user_by_token
 from fastapi import status
 
@@ -11,6 +12,16 @@ __all__ = [
     "ORIGINS",
 ]
 logger = logging.getLogger(__name__)
+
+
+def _error_response(status_code: int, detail: str) -> JSONResponse:
+    """Build the error response by hand.
+
+    Starlette's `ExceptionMiddleware` sits *inside* the router, so an
+    `HTTPException` raised from an `@app.middleware("http")` function is never
+    translated into a response: it propagates to the server and becomes a 500.
+    """
+    return JSONResponse(status_code=status_code, content={"detail": detail})
 
 
 ORIGINS = [
@@ -37,33 +48,32 @@ def create_login_middleware():
         if request.url.path in public_paths:
             return await call_next(request)
 
-        try:
-            # Get the Authorization header. Accessing the header as a dictionary
-            # to handle the case where the header is not present with a KeyError.
-            # This is a more Pythonic way to handle this situation.
-            auth_header = request.headers["Authorization"]
-            # Check if it starts with "Token "
-            if not auth_header.startswith("Token "):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid token format.",
-                )
-
-            # Extract the token
-            token = auth_header.removeprefix("Token ")
-            # Validate token and get user
-            user = get_user_by_token(token)
-
-            # Add user to request state
-            request.state.user = user
-
-            return await call_next(request)
-
-        except KeyError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unauthorized: No correct header found",
+        auth_header = request.headers.get("Authorization")
+        if auth_header is None:
+            return _error_response(
+                status.HTTP_401_UNAUTHORIZED,
+                "Unauthorized: No correct header found",
             )
+
+        # Check if it starts with "Token "
+        if not auth_header.startswith("Token "):
+            return _error_response(
+                status.HTTP_401_UNAUTHORIZED,
+                "Invalid token format.",
+            )
+
+        # Extract the token
+        token = auth_header.removeprefix("Token ")
+        # Validate token and get user
+        try:
+            user = get_user_by_token(token)
+        except HTTPException as exc:
+            return _error_response(exc.status_code, exc.detail)
+
+        # Add user to request state
+        request.state.user = user
+
+        return await call_next(request)
 
     return login_required
 
@@ -81,30 +91,22 @@ def create_already_authenticated_middleware():
         ):
             return await call_next(request)
 
+        # Check if user is already authenticated via token
+        token = request.headers["Authorization"].removeprefix("Token ")
         try:
-            # Check if user is already authenticated via token
-            auth_header = request.headers["Authorization"]
-            token = auth_header.removeprefix("Token ")
             user = get_user_by_token(token=token)
-            if not is_token_linked_to_correct_user(token=token, email=user.email):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Unauthorized: Token is not linked to the correct user",
-                )
-            if user.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="You are already authenticated. Please logout first.",
-                )
-        except KeyError:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Unauthorized: No token found",
+        except HTTPException as exc:
+            return _error_response(exc.status_code, exc.detail)
+
+        if not is_token_linked_to_correct_user(token=token, email=user.email):
+            return _error_response(
+                status.HTTP_403_FORBIDDEN,
+                "Unauthorized: Token is not linked to the correct user",
             )
-        except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="A critical error occurred",
+        if user.is_active:
+            return _error_response(
+                status.HTTP_403_FORBIDDEN,
+                "You are already authenticated. Please logout first.",
             )
 
         return await call_next(request)
