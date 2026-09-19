@@ -1,0 +1,43 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+  <div class="flex flex-col gap-2">
+    <label for="cliente-ragione" class="text-sm font-medium leading-normal">Ragione sociale</label>
+    <input
+      pInputText
+      id="cliente-ragione"
+      type="text"
+      formControlName="ragioneSociale"
+      placeholder="Es. Bianchi S.p.A."
+      class="w-full rounded-lg px-3 py-2 shadow-sm" />
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label for="cliente-indirizzo" class="text-sm font-medium leading-normal">Indirizzo</label>
+    <input
+      pInputText
+      id="cliente-indirizzo"
+      type="text"
+      formControlName="indirizzo"
+      placeholder="Via, civico, città"
+      class="w-full rounded-lg px-3 py-2 shadow-sm" />
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label for="cliente-codice" class="text-sm font-medium leading-normal">Codice cliente</label>
+    <input
+      pInputText
+      id="cliente-codice"
+      type="text"
+      formControlName="codice"
+      placeholder="Es. CL-0142"
+      class="w-full rounded-lg px-3 py-2 shadow-sm" />
+  </div>
+
+  <button
+    type="submit"
+    pButton
+    [disabled]="!isFormValid()"
+    [class]="!isFormValid() ? '!cursor-not-allowed' : ''"
+    class="w-full justify-center rounded-lg py-2">
+    <span pButtonLabel>Salva cliente</span>
+  </button>
+</form>
