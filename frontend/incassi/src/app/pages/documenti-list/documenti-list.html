@@ -10,7 +10,7 @@
       aria-label="Indietro">
       <i pButtonIcon class="fa fa-chevron-left"></i>
     </button>
-    <h1 class="text-lg font-semibold text-surface-900 dark:text-surface-0">Tutti i documenti</h1>
+    <h1 class="text-lg font-semibold dark:text-white">Tutti i documenti</h1>
   </div>
 
   <div class="flex gap-2">
@@ -20,7 +20,7 @@
       [class]="
         filtro() === 'tutti'
           ? 'border-transparent bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-300'
-          : 'border-surface-200 text-surface-600 dark:border-surface-700 dark:text-surface-300'
+          : 'border-surface-200 dark:border-surface-700 dark:text-surface-300'
       "
       (click)="impostaFiltro('tutti')">
       Tutti
@@ -31,7 +31,7 @@
       [class]="
         filtro() === 'a4'
           ? 'border-transparent bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-300'
-          : 'border-surface-200 text-surface-600 dark:border-surface-700 dark:text-surface-300'
+          : 'border-surface-200 dark:border-surface-700 dark:text-surface-300'
       "
       (click)="impostaFiltro('a4')">
       Riepilogo A4
@@ -42,7 +42,7 @@
       [class]="
         filtro() === 'busta'
           ? 'border-transparent bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-300'
-          : 'border-surface-200 text-surface-600 dark:border-surface-700 dark:text-surface-300'
+          : 'border-surface-200 dark:border-surface-700 dark:text-surface-300'
       "
       (click)="impostaFiltro('busta')">
       Busta
