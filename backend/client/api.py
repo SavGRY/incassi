@@ -3,26 +3,40 @@ from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
 from core.db.database import get_db
 from core.db.models import Client
-from client.schema import Client as ClientSchema, ClientFromForm
+from client.schema import (
+    Client as ClientSchema,
+    ClientCreated,
+    ClientFromForm,
+)
 from fastapi import status, HTTPException
 
 router = APIRouter(prefix="/client", tags=["client"])
 
 
-@router.post(path="/create")
+@router.post(
+    path="/create",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ClientCreated,
+)
 async def create_client(
     client_payload: Annotated[ClientFromForm, Form()], db: Session = Depends(get_db)
 ):
     """
     Api function to create a Client
 
+    The payload is validated by `ClientFromForm`, so a malformed `province` or
+    an empty `name` never reaches this function: FastAPI answers 422 first.
+
     :param client_payload: The payload sent from the FrontEnd via Form
     :param db: The db session, defaults to Depends(get_db)
     """
-    if len(client_payload.province) > 2:
+    # `code` is the primary key, so a duplicate is a conflict the user can fix
+    # by picking another code, not an internal error.
+    already_exists = db.query(Client).filter(Client.code == client_payload.code).first()
+    if already_exists:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Province {client_payload.province} has more than 2 letters: {len(client_payload.province)}",
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Client with code {client_payload.code} already exists",
         )
 
     new_client: Client = Client(
@@ -36,30 +50,28 @@ async def create_client(
         db.add(new_client)
         db.commit()
         db.refresh(new_client)
-        return {"message": "Client successfully created", "data": new_client}
     except Exception:
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="A critical error occurred",
         )
+    return {"message": "Client successfully created", "data": new_client}
 
 
-@router.get("/list")
+@router.get("/list", response_model=list[ClientSchema])
 async def get_client_list(
     db: Session = Depends(get_db),
 ):
     """
     API that gets all the clients in the db
 
+    An empty catalogue is a legitimate state and not an error: the frontend
+    autocomplete loads this endpoint before any client has been created.
+
     :param db: The db session, defaults to Depends(get_db)
-    :return: List of clients or a JSONResponse if there's none
+    :return: The list of clients, empty when there is none
     """
-    client_list = db.query(Client).all()
-    if not client_list:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No clients found",
-        )
     return list(db.query(Client).all())
 
 
