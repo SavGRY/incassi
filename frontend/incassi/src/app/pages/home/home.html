@@ -1,0 +1,15 @@
+<div class="container mx-auto flex flex-col gap-7 pb-28">
+  <app-recent-documents [documenti]="documenti()" />
+</div>
+
+<app-create-toggler
+  (creaIncasso)="incassoDrawerAperto.set(true)"
+  (creaCliente)="clienteDrawerAperto.set(true)" />
+
+<p-drawer [(visible)]="incassoDrawerAperto" position="bottom" header="Nuovo incasso" styleClass="h-fit!">
+  <app-incasso-form (salva)="onSalvaIncasso($event)" />
+</p-drawer>
+
+<p-drawer [(visible)]="clienteDrawerAperto" position="bottom" header="Nuovo cliente" styleClass="h-fit!">
+  <app-cliente-form (salva)="onSalvaCliente($event)" />
+</p-drawer>
