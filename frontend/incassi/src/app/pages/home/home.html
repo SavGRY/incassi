@@ -11,5 +11,10 @@
 </p-drawer>
 
 <p-drawer [(visible)]="clienteDrawerAperto" position="bottom" header="Nuovo cliente" styleClass="h-fit!">
+  @if (erroreCliente()) {
+    <p role="alert" class="mb-4 rounded-lg px-3 py-2 text-sm text-red-700 dark:text-red-300">
+      {{ erroreCliente() }}
+    </p>
+  }
   <app-cliente-form (salva)="onSalvaCliente($event)" />
 </p-drawer>
