@@ -5,8 +5,10 @@
       pInputText
       id="cliente-ragione"
       type="text"
-      formControlName="ragioneSociale"
+      formControlName="name"
       placeholder="Es. Bianchi S.p.A."
+      autocomplete="organization"
+      required
       class="w-full rounded-lg px-3 py-2 shadow-sm" />
   </div>
 
@@ -16,9 +18,41 @@
       pInputText
       id="cliente-indirizzo"
       type="text"
-      formControlName="indirizzo"
-      placeholder="Via, civico, città"
+      formControlName="address"
+      placeholder="Via, civico"
+      autocomplete="street-address"
       class="w-full rounded-lg px-3 py-2 shadow-sm" />
+  </div>
+
+  <div class="flex items-start gap-3">
+    <div class="flex grow flex-col gap-2">
+      <label for="cliente-citta" class="text-sm font-medium leading-normal">Città</label>
+      <input
+        pInputText
+        id="cliente-citta"
+        type="text"
+        formControlName="city"
+        placeholder="Es. Milano"
+        autocomplete="address-level2"
+        required
+        class="w-full rounded-lg px-3 py-2 shadow-sm" />
+    </div>
+
+    <div class="flex w-24 shrink-0 flex-col gap-2">
+      <label for="cliente-provincia" class="text-sm font-medium leading-normal">Provincia</label>
+      <input
+        pInputText
+        id="cliente-provincia"
+        type="text"
+        formControlName="province"
+        placeholder="MI"
+        maxlength="2"
+        autocomplete="address-level1"
+        aria-describedby="cliente-provincia-aiuto"
+        required
+        class="w-full rounded-lg px-3 py-2 uppercase shadow-sm" />
+      <span id="cliente-provincia-aiuto" class="text-xs opacity-70">Sigla di 2 lettere</span>
+    </div>
   </div>
 
   <div class="flex flex-col gap-2">
@@ -26,9 +60,13 @@
     <input
       pInputText
       id="cliente-codice"
-      type="text"
-      formControlName="codice"
-      placeholder="Es. CL-0142"
+      type="number"
+      inputmode="numeric"
+      min="1"
+      step="1"
+      formControlName="code"
+      placeholder="Es. 142"
+      required
       class="w-full rounded-lg px-3 py-2 shadow-sm" />
   </div>
 

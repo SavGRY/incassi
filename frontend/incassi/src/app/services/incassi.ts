@@ -10,7 +10,7 @@ export class Incassi {
 
   crea(incasso: NuovoIncasso) {
     const corpo = new FormData();
-    corpo.set('cliente', incasso.cliente.codice);
+    corpo.set('cliente', String(incasso.cliente.code));
     corpo.set('importo', String(incasso.importo));
     corpo.set('tipoPagamento', incasso.tipoPagamento);
     corpo.set('immagine', incasso.immagine);
