@@ -1,0 +1,18 @@
+<button
+  type="button"
+  class="flex w-full items-center gap-3 border-b border-surface-200 py-3 text-left last:border-b-0 dark:border-surface-700">
+  <div class="h-12 w-9 shrink-0">
+    <app-document-thumbnail [tipo]="documento().tipo" [showBadge]="false" />
+  </div>
+  <div class="min-w-0 flex-1">
+    <div class="truncate text-sm font-semibold text-surface-900 dark:text-surface-0">
+      {{ documento().nome }}
+    </div>
+    <div class="truncate text-xs text-surface-500 dark:text-surface-400">
+      {{ documento().data | date: 'd MMM y' }} &middot; {{ documento().dettaglio }}
+    </div>
+  </div>
+  <p-tag
+    [value]="documento().tipo === 'a4' ? 'A4' : 'Busta'"
+    [severity]="documento().tipo === 'a4' ? 'info' : 'secondary'" />
+</button>

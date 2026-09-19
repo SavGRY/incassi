@@ -1,0 +1,10 @@
+<div
+  class="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border border-surface-200 bg-surface-0 p-2 shadow-sm dark:border-surface-700 dark:bg-surface-900">
+  @if (showBadge()) {
+    <p-tag
+      [value]="tipo() === 'a4' ? 'A4' : 'Busta'"
+      [severity]="tipo() === 'a4' ? 'info' : 'secondary'"
+      class="absolute top-1.5 right-1.5 z-10" />
+  }
+  <img [src]="immagine()" alt="" aria-hidden="true" class="h-full w-full object-cover" />
+</div>
