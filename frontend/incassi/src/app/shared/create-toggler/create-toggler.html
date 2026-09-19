@@ -1,0 +1,29 @@
+<div class="fixed right-5 bottom-6 z-30 flex flex-col items-end gap-2.5">
+  @if (aperto()) {
+    <p-button
+      label="Crea cliente"
+      icon="fa"
+      iconPos="right"
+      [class]="'fa-user-plus'"
+      [outlined]="true"
+      styleClass="shadow-md bg-surface-0! dark:bg-surface-900!"
+      (onClick)="onCreaCliente()" />
+    <p-button
+      label="Crea incasso"
+      icon="fa"
+      iconPos="right"
+      [class]="'fa-plus'"
+      styleClass="shadow-md"
+      (onClick)="onCreaIncasso()" />
+  }
+
+  <p-button
+    icon="fa"
+    [class]="aperto() ? 'fa-xmark' : 'fa-plus-large'"
+    [rounded]="true"
+    size="large"
+    styleClass="shadow-lg h-14! w-14!"
+    ariaLabel="Crea nuovo"
+    [attr.aria-expanded]="aperto()"
+    (onClick)="toggle()" />
+</div>
