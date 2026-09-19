@@ -1,27 +1,41 @@
 import {Component, computed, inject, output, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AutoComplete, type AutoCompleteCompleteEvent} from '@openng/optimus-ui/autocomplete';
-import {ButtonDirective, ButtonLabel} from '@openng/optimus-ui/button';
+import {Button, ButtonDirective, ButtonLabel} from '@openng/optimus-ui/button';
+import {FileUpload} from '@openng/optimus-ui/fileupload';
 import {InputText} from '@openng/optimus-ui/inputtext';
 import {SelectButton} from '@openng/optimus-ui/selectbutton';
+import type {FileSelectEvent} from '@openng/optimus-ui/types/fileupload';
 import type {Cliente} from '../../models/cliente';
+import type {NuovoIncasso} from '../../models/incasso';
 import {Clienti} from '../../services/clienti';
-
-export interface NuovoIncasso {
-  cliente: Cliente;
-  importo: number;
-  tipoPagamento: 'contanti' | 'assegno';
-}
 
 @Component({
   selector: 'app-incasso-form',
-  imports: [ReactiveFormsModule, AutoComplete, InputText, SelectButton, ButtonDirective, ButtonLabel],
+  imports: [
+    ReactiveFormsModule,
+    AutoComplete,
+    InputText,
+    SelectButton,
+    ButtonDirective,
+    ButtonLabel,
+    Button,
+    FileUpload,
+  ],
   templateUrl: './incasso-form.html',
 })
 export class IncassoForm {
   private readonly clientiService = inject(Clienti);
 
   suggerimenti = signal<Cliente[]>([]);
+  immagine = signal<File | null>(null);
+
+  // Il bottone di scelta e' renderizzato da p-fileupload: lo stile arriva da qui.
+  readonly sceltaImmagineProps = {
+    rounded: true,
+    ariaLabel: "Scegli un'immagine dalla galleria",
+  };
 
   readonly tipiPagamento = [
     {label: 'Contanti', value: 'contanti'},
@@ -34,22 +48,31 @@ export class IncassoForm {
     tipoPagamento: new FormControl<'contanti' | 'assegno'>('contanti', {nonNullable: true}),
   });
 
-  isFormValid = computed(() => this.form.valid);
+  private readonly stato = toSignal(this.form.statusChanges, {initialValue: this.form.status});
+
+  isFormValid = computed(() => this.stato() === 'VALID' && this.immagine() !== null);
 
   salva = output<NuovoIncasso>();
+
+  onFileSelezionato(event: FileSelectEvent): void {
+    this.immagine.set(event.currentFiles[0] ?? null);
+  }
 
   cercaClienti(event: AutoCompleteCompleteEvent): void {
     this.suggerimenti.set(this.clientiService.cerca(event.query));
   }
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || !this.immagine()) return;
+
     const value = this.form.getRawValue();
     this.salva.emit({
       cliente: value.cliente as Cliente,
       importo: value.importo as number,
       tipoPagamento: value.tipoPagamento,
+      immagine: this.immagine()!,
     });
     this.form.reset({tipoPagamento: 'contanti'});
+    this.immagine.set(null);
   }
 }
