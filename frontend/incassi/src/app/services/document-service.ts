@@ -1,9 +1,9 @@
 import {Injectable, signal} from '@angular/core';
-import type {Documento} from '../models/documento';
+import {IncassiDocument} from '../models/document';
 
 @Injectable({providedIn: 'root'})
-export class Documenti {
-  readonly documenti = signal<Documento[]>([
+export class DocumentService {
+  readonly documents = signal<IncassiDocument[]>([
     {id: '1', nome: 'Riepilogo Giro 12', data: new Date('2026-09-15'), tipo: 'a4', dettaglio: '3 assegni, 4 ricevute'},
     {id: '2', nome: 'Busta Bianchi S.p.A.', data: new Date('2026-09-15'), tipo: 'busta', dettaglio: '€ 640,00'},
     {id: '3', nome: 'Riepilogo Giro 11', data: new Date('2026-09-12'), tipo: 'a4', dettaglio: '2 assegni, 3 ricevute'},

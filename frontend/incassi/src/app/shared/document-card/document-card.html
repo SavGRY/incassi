@@ -1,11 +1,11 @@
 <button type="button" class="flex w-33 shrink-0 snap-start flex-col gap-1.5 text-left">
   <div class="aspect-3/4 w-full">
-    <app-document-thumbnail [tipo]="documento().tipo" />
+    <app-document-thumbnail [tipo]="document().tipo" />
   </div>
   <span class="truncate text-sm leading-tight font-semibold dark:text-white">
-    {{ documento().nome }}
+    {{ document().nome }}
   </span>
   <span class="text-xs text-surface-500 dark:text-surface-400">
-    {{ documento().data | date: 'd MMM y' }}
+    {{ document().data | date: 'd MMM y' }}
   </span>
 </button>

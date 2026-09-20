@@ -7,22 +7,22 @@ import {Button} from '@openng/optimus-ui/button';
   templateUrl: './create-toggler.html',
 })
 export class CreateToggler {
-  aperto = signal(false);
+  isDrawerOpen = signal(false);
 
-  creaIncasso = output<void>();
-  creaCliente = output<void>();
+  createIncasso = output<void>();
+  createCliente = output<void>();
 
   toggle(): void {
-    this.aperto.update((current) => !current);
+    this.isDrawerOpen.update((currentState) => !currentState);
   }
 
-  onCreaIncasso(): void {
-    this.aperto.set(false);
-    this.creaIncasso.emit();
+  onCreateIncasso(): void {
+    this.isDrawerOpen.set(false);
+    this.createIncasso.emit();
   }
 
-  onCreaCliente(): void {
-    this.aperto.set(false);
-    this.creaCliente.emit();
+  onCreateCliente(): void {
+    this.isDrawerOpen.set(false);
+    this.createCliente.emit();
   }
 }

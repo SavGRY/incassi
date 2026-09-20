@@ -1,6 +1,6 @@
 import {DatePipe} from '@angular/common';
 import {Component, input} from '@angular/core';
-import type {Documento} from '../../models/documento';
+import {IncassiDocument} from '../../models/document';
 import {DocumentThumbnail} from '../document-thumbnail/document-thumbnail';
 
 @Component({
@@ -9,5 +9,5 @@ import {DocumentThumbnail} from '../document-thumbnail/document-thumbnail';
   templateUrl: './document-card.html',
 })
 export class DocumentCard {
-  documento = input.required<Documento>();
+  document = input.required<IncassiDocument>();
 }

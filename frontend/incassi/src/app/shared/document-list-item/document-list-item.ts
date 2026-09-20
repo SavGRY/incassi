@@ -1,7 +1,7 @@
 import {DatePipe} from '@angular/common';
 import {Component, input} from '@angular/core';
 import {Tag} from '@openng/optimus-ui/tag';
-import type {Documento} from '../../models/documento';
+import type {IncassiDocument} from '../../models/document';
 import {DocumentThumbnail} from '../document-thumbnail/document-thumbnail';
 
 @Component({
@@ -10,5 +10,5 @@ import {DocumentThumbnail} from '../document-thumbnail/document-thumbnail';
   templateUrl: './document-list-item.html',
 })
 export class DocumentListItem {
-  documento = input.required<Documento>();
+  document = input.required<IncassiDocument>();
 }
