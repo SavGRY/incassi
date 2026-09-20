@@ -1,5 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable, inject} from '@angular/core';
+import {firstValueFrom} from 'rxjs';
 import type {NuovoIncasso} from '../models/incasso';
 
 @Injectable({providedIn: 'root'})
@@ -8,13 +9,13 @@ export class Incassi {
   // placeholder
   private readonly API_URL = 'http://localhost:8000/api/v1/incassi';
 
-  crea(incasso: NuovoIncasso) {
+  crea(incasso: NuovoIncasso): Promise<unknown> {
     const corpo = new FormData();
     corpo.set('cliente', String(incasso.cliente.code));
     corpo.set('importo', String(incasso.importo));
     corpo.set('tipoPagamento', incasso.tipoPagamento);
     corpo.set('immagine', incasso.immagine);
 
-    return this.http.post(this.API_URL, corpo);
+    return firstValueFrom(this.http.post(this.API_URL, corpo));
   }
 }

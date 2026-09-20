@@ -26,27 +26,31 @@ export class Home {
   clienteDrawerAperto = signal(false);
   erroreCliente = signal('');
 
-  constructor() {
-    // The catalogue feeds the autocomplete of the incasso form.
-    this.clientiService.carica().subscribe({error: () => undefined});
+  /**
+   * The incasso form asks for the catalogue that feeds its autocomplete when
+   * the drawer builds it. `carica` is idempotent, so the API is hit once.
+   */
+  onGetClient(): void {
+    this.clientiService.askForClient();
   }
 
-  onSalvaIncasso(incasso: NuovoIncasso): void {
-    this.incassiService.crea(incasso).subscribe();
+  async onSalvaIncasso(incasso: NuovoIncasso): Promise<void> {
+    await this.incassiService.crea(incasso);
     this.incassoDrawerAperto.set(false);
   }
 
-  onSalvaCliente(cliente: NuovoCliente): void {
+  async onSalvaCliente(cliente: NuovoCliente): Promise<void> {
     this.erroreCliente.set('');
-    this.clientiService.crea(cliente).subscribe({
-      next: () => this.clienteDrawerAperto.set(false),
+    try {
+      await this.clientiService.crea(cliente);
+      this.clienteDrawerAperto.set(false);
+    } catch (errore) {
       // The drawer stays open so the user can fix the code and try again.
-      error: (errore: {status?: number}) =>
-        this.erroreCliente.set(
-          errore.status === 409
-            ? 'Esiste già un cliente con questo codice.'
-            : 'Non è stato possibile salvare il cliente. Riprova.'
-        ),
-    });
+      this.erroreCliente.set(
+        (errore as {status?: number}).status === 409
+          ? 'Esiste già un cliente con questo codice.'
+          : 'Non è stato possibile salvare il cliente. Riprova.'
+      );
+    }
   }
 }
