@@ -1,4 +1,4 @@
-import {Component, computed, inject, output, signal} from '@angular/core';
+import {Component, computed, inject, type OnInit, output, signal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AutoComplete, type AutoCompleteCompleteEvent} from '@openng/optimus-ui/autocomplete';
@@ -25,11 +25,17 @@ import {Clienti} from '../../services/clienti';
   ],
   templateUrl: './incasso-form.html',
 })
-export class IncassoForm {
+export class IncassoForm implements OnInit {
   private readonly clientiService = inject(Clienti);
 
   suggerimenti = signal<Cliente[]>([]);
   immagine = signal<File | null>(null);
+
+  /**
+   * Asks the page for the client catalogue. The drawer only builds this form
+   * when it opens, so this fires on opening and nowhere else.
+   */
+  emitGetClient = output<void>();
 
   // Il bottone di scelta e' renderizzato da p-fileupload: lo stile arriva da qui.
   readonly sceltaImmagineProps = {
@@ -54,6 +60,10 @@ export class IncassoForm {
 
   salva = output<NuovoIncasso>();
 
+  ngOnInit(): void {
+    this.emitGetClient.emit();
+  }
+
   onFileSelezionato(event: FileSelectEvent): void {
     this.immagine.set(event.currentFiles[0] ?? null);
   }
@@ -70,6 +80,7 @@ export class IncassoForm {
       cliente: value.cliente as Cliente,
       importo: value.importo as number,
       tipoPagamento: value.tipoPagamento,
+      // biome-ignore lint/style/noNonNullAssertion: <the control has been done above>
       immagine: this.immagine()!,
     });
     this.form.reset({tipoPagamento: 'contanti'});

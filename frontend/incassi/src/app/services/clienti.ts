@@ -1,6 +1,6 @@
-import {HttpClient} from '@angular/common/http';
-import {Injectable, inject, signal} from '@angular/core';
-import {map, type Observable, tap} from 'rxjs';
+import {HttpClient, httpResource} from '@angular/common/http';
+import {computed, Injectable, inject, signal} from '@angular/core';
+import {firstValueFrom} from 'rxjs';
 import type {Cliente, ClienteCreato, NuovoCliente} from '../models/cliente';
 
 @Injectable({providedIn: 'root'})
@@ -8,17 +8,35 @@ export class Clienti {
   private readonly http = inject(HttpClient);
   private readonly API_URL = 'http://localhost:8000/api/v1/client';
 
-  private readonly elenco = signal<Cliente[]>([]);
+  /**
+   * Flipped by the first consumer that needs the catalogue. Until then the
+   * request stays `undefined` and the resource never calls the API.
+   */
+  private readonly askingClient = signal(false);
 
-  /** The catalogue, kept in memory so the autocomplete can search it offline. */
-  readonly clienti = this.elenco.asReadonly();
+  private readonly catalogo = httpResource<Cliente[]>(
+    () => (this.askingClient() ? `${this.API_URL}/list` : undefined),
+    {
+      defaultValue: [],
+    }
+  );
 
-  carica(): Observable<Cliente[]> {
-    return this.http.get<Cliente[]>(`${this.API_URL}/list`).pipe(tap((clienti) => this.elenco.set(clienti)));
+  /**
+   * Reading `catalogo.value()` throws while the resource is in an error state,
+   * which would take the whole template down with it. A failed load just means
+   * there is nothing to suggest yet.
+   */
+  readonly clienti = computed<Cliente[]>(() => (this.catalogo.error() ? [] : this.catalogo.value()));
+
+  /**
+   * Asks for the catalogue. The signal only ever goes from `false` to `true`,
+   * so the API is called once however many times this is called.
+   */
+  askForClient(): void {
+    this.askingClient.set(true);
   }
 
-  crea(cliente: NuovoCliente): Observable<Cliente> {
-    // The endpoint reads a form, not JSON: `Annotated[ClientFromForm, Form()]`.
+  async crea(cliente: NuovoCliente): Promise<Cliente> {
     const corpo = new FormData();
     corpo.set('code', String(cliente.code));
     corpo.set('name', cliente.name);
@@ -26,16 +44,15 @@ export class Clienti {
     corpo.set('city', cliente.city);
     corpo.set('province', cliente.province);
 
-    return this.http.post<ClienteCreato>(`${this.API_URL}/create`, corpo).pipe(
-      map((risposta) => risposta.data),
-      tap((creato) => this.elenco.update((clienti) => [...clienti, creato]))
-    );
+    const risposta = await firstValueFrom(this.http.post<ClienteCreato>(`${this.API_URL}/create`, corpo));
+    this.catalogo.set([...this.clienti(), risposta.data]);
+    return risposta.data;
   }
 
   cerca(query: string): Cliente[] {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return this.elenco().filter(
+    return this.clienti().filter(
       (cliente) => cliente.name.toLowerCase().includes(q) || String(cliente.code).includes(q)
     );
   }

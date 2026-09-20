@@ -7,7 +7,7 @@
   (creaCliente)="clienteDrawerAperto.set(true)" />
 
 <p-drawer [(visible)]="incassoDrawerAperto" position="bottom" header="Nuovo incasso" styleClass="h-fit!">
-  <app-incasso-form (salva)="onSalvaIncasso($event)" />
+  <app-incasso-form (salva)="onSalvaIncasso($event)" (emitGetClient)="onGetClient()" />
 </p-drawer>
 
 <p-drawer [(visible)]="clienteDrawerAperto" position="bottom" header="Nuovo cliente" styleClass="h-fit!">
