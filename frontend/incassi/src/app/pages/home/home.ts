@@ -1,29 +1,29 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {Drawer} from '@openng/optimus-ui/drawer';
-import type {NuovoCliente} from '../../models/cliente';
-import type {NuovoIncasso} from '../../models/incasso';
-import {Clienti} from '../../services/clienti';
-import {Documenti} from '../../services/documenti';
-import {Incassi} from '../../services/incassi';
-import {ClienteForm} from '../../shared/cliente-form/cliente-form';
+import type {NewClient} from '../../models/Client';
+import type {NewIncasso} from '../../models/incasso';
+import {ClientService} from '../../services/client-service';
+import {DocumentService} from '../../services/document-service';
+import {IncassiService} from '../../services/incassi-service';
+import {ClientForm} from '../../shared/cliente-form/client-form';
 import {CreateToggler} from '../../shared/create-toggler/create-toggler';
 import {IncassoForm} from '../../shared/incasso-form/incasso-form';
 import {RecentDocuments} from '../../shared/recent-documents/recent-documents';
 
 @Component({
   selector: 'app-home',
-  imports: [RecentDocuments, CreateToggler, Drawer, IncassoForm, ClienteForm],
+  imports: [RecentDocuments, CreateToggler, Drawer, IncassoForm, ClientForm],
   templateUrl: './home.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home {
-  private readonly documentiService = inject(Documenti);
-  private readonly incassiService = inject(Incassi);
-  private readonly clientiService = inject(Clienti);
-  documenti = this.documentiService.documenti;
+  private readonly docService = inject(DocumentService);
+  private readonly incassiService = inject(IncassiService);
+  private readonly clientService = inject(ClientService);
+  documents = this.docService.documents();
 
-  incassoDrawerAperto = signal(false);
-  clienteDrawerAperto = signal(false);
+  isIncassoDrawerOpen = signal(false);
+  isClienteDrawerOpen = signal(false);
   erroreCliente = signal('');
 
   /**
@@ -31,19 +31,19 @@ export class Home {
    * the drawer builds it. `carica` is idempotent, so the API is hit once.
    */
   onGetClient(): void {
-    this.clientiService.askForClient();
+    this.clientService.askForClient();
   }
 
-  async onSalvaIncasso(incasso: NuovoIncasso): Promise<void> {
-    await this.incassiService.crea(incasso);
-    this.incassoDrawerAperto.set(false);
+  onSaveIncasso(incasso: NewIncasso): void {
+    this.incassiService.createIncasso(incasso);
+    this.isIncassoDrawerOpen.set(false);
   }
 
-  async onSalvaCliente(cliente: NuovoCliente): Promise<void> {
+  async onSaveClient(newClient: NewClient): Promise<void> {
     this.erroreCliente.set('');
     try {
-      await this.clientiService.crea(cliente);
-      this.clienteDrawerAperto.set(false);
+      await this.clientService.createNewClient(newClient);
+      this.isClienteDrawerOpen.set(false);
     } catch (errore) {
       // The drawer stays open so the user can fix the code and try again.
       this.erroreCliente.set(

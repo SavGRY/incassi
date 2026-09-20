@@ -1,9 +1,9 @@
-import type {Cliente} from './cliente';
+import {Client} from './Client';
 
 export type TipoPagamento = 'contanti' | 'assegno';
 
-export interface NuovoIncasso {
-  cliente: Cliente;
+export interface NewIncasso {
+  cliente: Client;
   importo: number;
   tipoPagamento: TipoPagamento;
   immagine: File;

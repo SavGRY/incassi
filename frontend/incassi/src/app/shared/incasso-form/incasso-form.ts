@@ -7,9 +7,9 @@ import {FileUpload} from '@openng/optimus-ui/fileupload';
 import {InputText} from '@openng/optimus-ui/inputtext';
 import {SelectButton} from '@openng/optimus-ui/selectbutton';
 import type {FileSelectEvent} from '@openng/optimus-ui/types/fileupload';
-import type {Cliente} from '../../models/cliente';
-import type {NuovoIncasso} from '../../models/incasso';
-import {Clienti} from '../../services/clienti';
+import type {Client} from '../../models/Client';
+import type {NewIncasso} from '../../models/incasso';
+import {ClientService} from '../../services/client-service';
 
 @Component({
   selector: 'app-incasso-form',
@@ -26,10 +26,10 @@ import {Clienti} from '../../services/clienti';
   templateUrl: './incasso-form.html',
 })
 export class IncassoForm implements OnInit {
-  private readonly clientiService = inject(Clienti);
+  private readonly clientService = inject(ClientService);
 
-  suggerimenti = signal<Cliente[]>([]);
-  immagine = signal<File | null>(null);
+  autocomplete = signal<Client[]>([]);
+  uploadedImage = signal<File | null>(null);
 
   /**
    * Asks the page for the client catalogue. The drawer only builds this form
@@ -43,47 +43,48 @@ export class IncassoForm implements OnInit {
     ariaLabel: "Scegli un'immagine dalla galleria",
   };
 
-  readonly tipiPagamento = [
+  readonly paymentType = [
     {label: 'Contanti', value: 'contanti'},
     {label: 'Assegno', value: 'assegno'},
   ];
 
   form = new FormGroup({
-    cliente: new FormControl<Cliente | null>(null, Validators.required),
+    cliente: new FormControl<Client | null>(null, Validators.required),
     importo: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
     tipoPagamento: new FormControl<'contanti' | 'assegno'>('contanti', {nonNullable: true}),
   });
 
-  private readonly stato = toSignal(this.form.statusChanges, {initialValue: this.form.status});
+  private readonly formState = toSignal(this.form.statusChanges, {initialValue: this.form.status});
 
-  isFormValid = computed(() => this.stato() === 'VALID' && this.immagine() !== null);
+  isFormValid = computed(() => this.formState() === 'VALID' && this.uploadedImage() !== null);
 
-  salva = output<NuovoIncasso>();
+  saveNewIncasso = output<NewIncasso>();
 
   ngOnInit(): void {
     this.emitGetClient.emit();
   }
 
-  onFileSelezionato(event: FileSelectEvent): void {
-    this.immagine.set(event.currentFiles[0] ?? null);
+  onSelectedFile(event: FileSelectEvent): void {
+    this.uploadedImage.set(event.currentFiles[0] ?? null);
   }
 
-  cercaClienti(event: AutoCompleteCompleteEvent): void {
-    this.suggerimenti.set(this.clientiService.cerca(event.query));
+  searchClients(event: AutoCompleteCompleteEvent): void {
+    this.autocomplete.set(this.clientService.search(event.query));
+    console.log(this.autocomplete());
   }
 
   onSubmit(): void {
-    if (this.form.invalid || !this.immagine()) return;
+    if (this.form.invalid || !this.uploadedImage()) return;
 
     const value = this.form.getRawValue();
-    this.salva.emit({
-      cliente: value.cliente as Cliente,
+    this.saveNewIncasso.emit({
+      cliente: value.cliente as Client,
       importo: value.importo as number,
       tipoPagamento: value.tipoPagamento,
-      // biome-ignore lint/style/noNonNullAssertion: <the control has been done above>
-      immagine: this.immagine()!,
+      // biome-ignore lint/style/noNonNullAssertion: <Control done above>
+      immagine: this.uploadedImage()!,
     });
     this.form.reset({tipoPagamento: 'contanti'});
-    this.immagine.set(null);
+    this.uploadedImage.set(null);
   }
 }

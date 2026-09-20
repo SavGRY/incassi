@@ -18,40 +18,40 @@
       type="button"
       class="rounded-full border px-3.5 py-1.5 text-sm font-semibold"
       [class]="
-        filtro() === 'tutti'
+        filter() === 'tutti'
           ? 'border-transparent bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-300'
           : 'border-surface-200 dark:border-surface-700 dark:text-surface-300'
       "
-      (click)="impostaFiltro('tutti')">
+      (click)="setFilter('tutti')">
       Tutti
     </button>
     <button
       type="button"
       class="rounded-full border px-3.5 py-1.5 text-sm font-semibold"
       [class]="
-        filtro() === 'a4'
+        filter() === 'a4'
           ? 'border-transparent bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-300'
           : 'border-surface-200 dark:border-surface-700 dark:text-surface-300'
       "
-      (click)="impostaFiltro('a4')">
+      (click)="setFilter('a4')">
       Riepilogo A4
     </button>
     <button
       type="button"
       class="rounded-full border px-3.5 py-1.5 text-sm font-semibold"
       [class]="
-        filtro() === 'busta'
+        filter() === 'busta'
           ? 'border-transparent bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-300'
           : 'border-surface-200 dark:border-surface-700 dark:text-surface-300'
       "
-      (click)="impostaFiltro('busta')">
+      (click)="setFilter('busta')">
       Busta
     </button>
   </div>
 
   <div>
-    @for (documento of documentiFiltrati(); track documento.id) {
-      <app-document-list-item [documento]="documento" />
+    @for (doc of filteredDocuments(); track doc.id) {
+      <app-document-list-item [document]="doc" />
     }
   </div>
 </div>

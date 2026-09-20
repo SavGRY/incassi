@@ -1,20 +1,20 @@
 <div class="container mx-auto flex flex-col gap-7 pb-28">
-  <app-recent-documents [documenti]="documenti()" />
+  <app-recent-documents [documents]="documents" />
 </div>
 
 <app-create-toggler
-  (creaIncasso)="incassoDrawerAperto.set(true)"
-  (creaCliente)="clienteDrawerAperto.set(true)" />
+  (createIncasso)="isIncassoDrawerOpen.set(true)"
+  (createCliente)="isClienteDrawerOpen.set(true)" />
 
-<p-drawer [(visible)]="incassoDrawerAperto" position="bottom" header="Nuovo incasso" styleClass="h-fit!">
-  <app-incasso-form (salva)="onSalvaIncasso($event)" (emitGetClient)="onGetClient()" />
+<p-drawer [(visible)]="isIncassoDrawerOpen" position="bottom" header="Nuovo incasso" styleClass="h-fit!">
+  <app-incasso-form (saveNewIncasso)="onSaveIncasso($event)" (emitGetClient)="onGetClient()" />
 </p-drawer>
 
-<p-drawer [(visible)]="clienteDrawerAperto" position="bottom" header="Nuovo cliente" styleClass="h-fit!">
+<p-drawer [(visible)]="isClienteDrawerOpen" position="bottom" header="Nuovo cliente" styleClass="h-fit!">
   @if (erroreCliente()) {
     <p role="alert" class="mb-4 rounded-lg px-3 py-2 text-sm text-red-700 dark:text-red-300">
       {{ erroreCliente() }}
     </p>
   }
-  <app-cliente-form (salva)="onSalvaCliente($event)" />
+  <app-cliente-form (saveNewClient)="onSaveClient($event)" />
 </p-drawer>

@@ -1,10 +1,10 @@
 import {HttpClient, httpResource} from '@angular/common/http';
 import {computed, Injectable, inject, signal} from '@angular/core';
 import {firstValueFrom} from 'rxjs';
-import type {Cliente, ClienteCreato, NuovoCliente} from '../models/cliente';
+import {Client, ClientCreated, NewClient} from '../models/Client';
 
 @Injectable({providedIn: 'root'})
-export class Clienti {
+export class ClientService {
   private readonly http = inject(HttpClient);
   private readonly API_URL = 'http://localhost:8000/api/v1/client';
 
@@ -14,7 +14,7 @@ export class Clienti {
    */
   private readonly askingClient = signal(false);
 
-  private readonly catalogo = httpResource<Cliente[]>(
+  private readonly clientList = httpResource<Client[]>(
     () => (this.askingClient() ? `${this.API_URL}/list` : undefined),
     {
       defaultValue: [],
@@ -22,11 +22,11 @@ export class Clienti {
   );
 
   /**
-   * Reading `catalogo.value()` throws while the resource is in an error state,
+   * Reading `clientList.value()` throws while the resource is in an error state,
    * which would take the whole template down with it. A failed load just means
    * there is nothing to suggest yet.
    */
-  readonly clienti = computed<Cliente[]>(() => (this.catalogo.error() ? [] : this.catalogo.value()));
+  readonly clientResponse = computed<Client[]>(() => (this.clientList.error() ? [] : this.clientList.value()));
 
   /**
    * Asks for the catalogue. The signal only ever goes from `false` to `true`,
@@ -36,24 +36,24 @@ export class Clienti {
     this.askingClient.set(true);
   }
 
-  async crea(cliente: NuovoCliente): Promise<Cliente> {
-    const corpo = new FormData();
-    corpo.set('code', String(cliente.code));
-    corpo.set('name', cliente.name);
-    corpo.set('address', cliente.address ?? '');
-    corpo.set('city', cliente.city);
-    corpo.set('province', cliente.province);
+  async createNewClient(client: NewClient): Promise<Client> {
+    const formBody = new FormData();
+    formBody.set('code', String(client.code));
+    formBody.set('name', client.name);
+    formBody.set('address', client.address ?? '');
+    formBody.set('city', client.city);
+    formBody.set('province', client.province);
 
-    const risposta = await firstValueFrom(this.http.post<ClienteCreato>(`${this.API_URL}/create`, corpo));
-    this.catalogo.set([...this.clienti(), risposta.data]);
-    return risposta.data;
+    const resp = await firstValueFrom(this.http.post<ClientCreated>(`${this.API_URL}/create`, formBody));
+    this.clientList.set([...this.clientResponse(), resp.data]);
+    return resp.data;
   }
 
-  cerca(query: string): Cliente[] {
+  search(query: string): Client[] {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return this.clienti().filter(
-      (cliente) => cliente.name.toLowerCase().includes(q) || String(cliente.code).includes(q)
+    return this.clientResponse().filter(
+      (client) => client.name.toLowerCase().includes(q) || String(client.code).includes(q)
     );
   }
 }

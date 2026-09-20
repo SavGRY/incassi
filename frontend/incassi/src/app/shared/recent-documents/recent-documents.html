@@ -13,11 +13,11 @@
       size="small"
       ariaLabel="Documenti precedenti"
       [class]="'fa-chevron-left'"
-      (onClick)="scorriIndietro()" />
+      (onClick)="scrollBack()" />
 
     <div #carousel class="flex snap-x snap-mandatory gap-3.5 overflow-x-auto scroll-smooth px-1 pb-1">
-      @for (documento of documenti(); track documento.id) {
-        <app-document-card [documento]="documento" />
+      @for (doc of documents(); track doc.id) {
+        <app-document-card [document]="doc" />
       }
     </div>
 
@@ -29,6 +29,6 @@
       size="small"
       ariaLabel="Documenti successivi"
       [class]="'fa-chevron-right'"
-      (onClick)="scorriAvanti()" />
+      (onClick)="scrollForward()" />
   </div>
 </section>

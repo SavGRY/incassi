@@ -1,7 +1,7 @@
 import {Component, ElementRef, input, viewChild} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {Button} from '@openng/optimus-ui/button';
-import type {Documento} from '../../models/documento';
+import type {IncassiDocument} from '../../models/document';
 import {DocumentCard} from '../document-card/document-card';
 
 @Component({
@@ -10,15 +10,15 @@ import {DocumentCard} from '../document-card/document-card';
   templateUrl: './recent-documents.html',
 })
 export class RecentDocuments {
-  documenti = input.required<Documento[]>();
+  documents = input.required<IncassiDocument[]>();
 
   private carousel = viewChild.required<ElementRef<HTMLElement>>('carousel');
 
-  scorriIndietro(): void {
+  scrollBack(): void {
     this.carousel().nativeElement.scrollBy({left: -160, behavior: 'smooth'});
   }
 
-  scorriAvanti(): void {
+  scrollForward(): void {
     this.carousel().nativeElement.scrollBy({left: 160, behavior: 'smooth'});
   }
 }
