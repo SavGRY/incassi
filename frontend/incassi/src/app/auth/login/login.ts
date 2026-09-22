@@ -52,7 +52,7 @@ export class Login implements OnDestroy {
     this.subscription.add(
       this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
         next: (response: LoginResponse) => {
-          localStorage.setItem('token', response.token);
+          this.authService.saveSession(response.token);
           this.router.navigate(['/']);
         },
         error: (error) => {
