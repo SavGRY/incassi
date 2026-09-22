@@ -1,0 +1,32 @@
+@if (isLoggedIn()) {
+  <p-button
+    icon="fa"
+    [class]="'fa-right-from-bracket'"
+    [outlined]="true"
+    [rounded]="true"
+    ariaLabel="Esci"
+    (onClick)="askForConfirmation()" />
+} @else {
+  <p-button
+    icon="fa"
+    [class]="'fa-right-to-bracket'"
+    [outlined]="true"
+    [rounded]="true"
+    ariaLabel="Accedi"
+    (onClick)="goToLogin()" />
+}
+
+<p-dialog
+  header="Conferma uscita"
+  [(visible)]="isConfirmingLogout"
+  [modal]="true"
+  [draggable]="false"
+  [breakpoints]="{ '1600px': '65vw', '575px': '90vw' }"
+  maskStyleClass="px-4"
+  closeAriaLabel="Annulla">
+  <p class="m-0">Vuoi davvero uscire?</p>
+  <ng-template #footer>
+    <p-button label="Annulla" [text]="true" ariaLabel="Annulla" (onClick)="cancelLogout()" />
+    <p-button label="Esci" severity="danger" ariaLabel="Conferma uscita" (onClick)="confirmLogout()" />
+  </ng-template>
+</p-dialog>

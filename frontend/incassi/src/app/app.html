@@ -1,13 +1,16 @@
-<div class='container flex flex-col gap-6'>
-  <div class='flex justify-between items-center'>
-    <h1 class=''>Ciao tuo nome </h1>
-    <p-button
-      class=''
-      icon='fa'
-      [outlined]='true'
-      [rounded]='true'
-      [class]="isDarkMode() ? 'fa-moon' : 'fa-sun-bright'" (onClick)='toggleDarkMode()'
-    />
-  </div>
+<div class="container flex flex-col gap-6">
+  <header class="flex justify-between items-center">
+    <h1 class="">Ciao tuo nome</h1>
+    <div class="flex items-center gap-2">
+      <p-button
+        icon="fa"
+        [outlined]="true"
+        [rounded]="true"
+        ariaLabel="Attiva/disattiva tema scuro"
+        [class]="isDarkMode() ? 'fa-moon' : 'fa-sun-bright'"
+        (onClick)="toggleDarkMode()" />
+      <app-auth-button />
+    </div>
+  </header>
   <router-outlet></router-outlet>
 </div>
