@@ -1,3 +1,4 @@
+import secrets
 from typing import Annotated
 
 from fastapi import APIRouter, Form, Request
@@ -56,17 +57,23 @@ async def login(
     password: Annotated[str, Form()],
     db: Session = Depends(get_db),
 ) -> dict[str, str]:
+    """Open a session, even if the db says one is already open.
+
+    `is_active` stays `True` whenever the client loses its token without a
+    logout (cleared storage, another device, a logout that never reached us):
+    refusing the login there would lock the user out. A fresh token is issued
+    instead, so any token handed out before stops working.
+    """
     user = authenticate_user(email=email, password=password, db=db)
 
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if user.is_active:
-        raise HTTPException(
-            status_code=403,
-            detail="You are already authenticated. Please logout first.",
-        )
-
+    # The payload has no time-based claim, so without `jti` the same email
+    # would always encode to the same token and nothing would be revoked.
+    user.token = create_access_token(
+        data={"sub": user.email, "jti": secrets.token_urlsafe(16)}
+    ).token
     user.is_active = True
     db.commit()
     return {"message": "Login successful", "token": user.token}

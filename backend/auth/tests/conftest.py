@@ -4,9 +4,10 @@ from auth.services import create_access_token, get_password_hash
 from core.db.database import SessionLocal
 from core.db.models import User
 
-__all__ = ["active_user", "auth_headers", "db_session"]
+__all__ = ["active_user", "auth_headers", "db_session", "TEST_EMAIL", "TEST_PASSWORD"]
 
 TEST_EMAIL = "auth-tests@example.com"
+TEST_PASSWORD = "testpassword123"
 
 
 @pytest.fixture
@@ -31,7 +32,7 @@ def active_user(db_session):
 
     user = User(
         email=TEST_EMAIL,
-        password=get_password_hash("testpassword123"),
+        password=get_password_hash(TEST_PASSWORD),
         token=token_data.token,
         is_active=True,
     )

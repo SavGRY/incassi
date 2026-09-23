@@ -80,7 +80,9 @@ def create_login_middleware():
 
 def create_already_authenticated_middleware():
     async def already_authenticated(request: Request, call_next):
-        checked_path = {API_PREFIX + "/auth" + path for path in ["/register", "/login"]}
+        # `/login` is left out on purpose: it has to work with a stale token
+        # still attached, see `auth.api.login`.
+        checked_path = {API_PREFIX + "/auth/register"}
 
         if request.url.path not in checked_path:
             return await call_next(request)
