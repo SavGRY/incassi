@@ -45,4 +45,37 @@ describe('Login', () => {
     expect(localStorage.getItem('token')).toBe('fresh-token');
     expect(navigate).toHaveBeenCalledWith(['/']);
   });
+
+  describe('password visibility toggle', () => {
+    const passwordInput = (): HTMLInputElement => fixture.nativeElement.querySelector('#password');
+    const toggleButton = (): HTMLButtonElement =>
+      fixture.nativeElement.querySelector('button[aria-controls="password"]');
+
+    it('hides the password by default', () => {
+      expect(passwordInput().type).toBe('password');
+      expect(toggleButton().getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('shows the password when the toggle is pressed', async () => {
+      toggleButton().click();
+      await fixture.whenStable();
+
+      expect(passwordInput().type).toBe('text');
+      expect(toggleButton().getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('hides the password again on a second press', async () => {
+      toggleButton().click();
+      await fixture.whenStable();
+      toggleButton().click();
+      await fixture.whenStable();
+
+      expect(passwordInput().type).toBe('password');
+      expect(toggleButton().getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('does not submit the form', () => {
+      expect(toggleButton().type).toBe('button');
+    });
+  });
 });
