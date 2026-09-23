@@ -22,6 +22,7 @@ export class AuthButton {
   }
 
   askForConfirmation(): void {
+    console.log('Asdasd');
     this.isConfirmingLogout.set(true);
   }
 
