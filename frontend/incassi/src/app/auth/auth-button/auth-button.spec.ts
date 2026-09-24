@@ -1,12 +1,21 @@
 import {provideHttpClient} from '@angular/common/http';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
+import {Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideRouter, Router} from '@angular/router';
+import {provideRouter, Router, Routes} from '@angular/router';
 import {vi} from 'vitest';
 import {Auth} from '../../services/auth';
 import {AuthButton} from './auth-button';
 
 const LOGOUT_URL = 'http://localhost:8000/api/v1/auth/logout';
+
+@Component({template: ''})
+class EmptyPage {}
+
+const ROUTES: Routes = [
+  {path: '', component: EmptyPage},
+  {path: 'login', component: EmptyPage},
+];
 
 describe('AuthButton', () => {
   let fixture: ComponentFixture<AuthButton>;
@@ -18,10 +27,16 @@ describe('AuthButton', () => {
   const query = (selector: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(selector) ?? document.body.querySelector(selector);
 
+  const visit = async (url: string): Promise<void> => {
+    await TestBed.inject(Router).navigateByUrl(url);
+    await fixture.whenStable();
+    fixture.detectChanges();
+  };
+
   const build = async (): Promise<void> => {
     await TestBed.configureTestingModule({
       imports: [AuthButton],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter(ROUTES)],
     }).compileComponents();
 
     httpMock = TestBed.inject(HttpTestingController);
@@ -52,6 +67,12 @@ describe('AuthButton', () => {
       expect(query('button[aria-label="Esci"]')).toBeNull();
     });
 
+    it('hides the login action on the login page itself', async () => {
+      await visit('/login');
+
+      expect(query('button[aria-label="Accedi"]')).toBeNull();
+    });
+
     it('goes to the login page without asking for a confirmation', () => {
       query('button[aria-label="Accedi"]')?.click();
       fixture.detectChanges();
@@ -72,6 +93,20 @@ describe('AuthButton', () => {
       expect(query('button[aria-label="Accedi"]')).toBeNull();
     });
 
+    it('hides the logout action on the login page', async () => {
+      await visit('/login');
+
+      expect(query('button[aria-label="Esci"]')).toBeNull();
+      expect(query('button[aria-label="Accedi"]')).toBeNull();
+    });
+
+    it('shows the logout action again when leaving the login page', async () => {
+      await visit('/login');
+      await visit('/');
+
+      expect(query('button[aria-label="Esci"]')).not.toBeNull();
+    });
+
     it('spaces the open dialog away from the screen edges', () => {
       component.askForConfirmation();
       fixture.detectChanges();
@@ -80,7 +115,7 @@ describe('AuthButton', () => {
       // component can never reach it: the spacing has to ride on `maskStyleClass`.
       const mask = query('.p-dialog-mask');
       expect(mask).not.toBeNull();
-      expect(mask?.classList.contains('py-4')).toBe(true);
+      expect(mask?.classList.contains('px-4')).toBe(true);
     });
 
     it('asks for a confirmation instead of logging out straight away', () => {

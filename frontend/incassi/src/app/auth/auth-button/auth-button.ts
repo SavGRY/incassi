@@ -1,7 +1,9 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {Router} from '@angular/router';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {NavigationEnd, Router} from '@angular/router';
 import {Button} from '@openng/optimus-ui/button';
 import {Dialog} from '@openng/optimus-ui/dialog';
+import {filter, map} from 'rxjs';
 import {Auth} from '../../services/auth';
 
 @Component({
@@ -15,6 +17,14 @@ export class AuthButton {
   private readonly authService: Auth = inject(Auth);
 
   readonly isLoggedIn = this.authService.isLoggedIn;
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects)
+    ),
+    {initialValue: this.router.url}
+  );
+  readonly isOnLoginPage = computed(() => this.currentUrl().startsWith('/login'));
   isConfirmingLogout = signal<boolean>(false);
 
   goToLogin(): void {
@@ -22,7 +32,6 @@ export class AuthButton {
   }
 
   askForConfirmation(): void {
-    console.log('Asdasd');
     this.isConfirmingLogout.set(true);
   }
 
