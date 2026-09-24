@@ -12,6 +12,7 @@ from core.middleware import (
 from client.api import router as client_router
 from auth.api import router as auth_router
 from incasso.api import router as incasso_router
+from scanner.api import router as scanner_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -35,6 +36,7 @@ app.add_middleware(
 app.include_router(router=auth_router, prefix=API_PREFIX)
 app.include_router(router=client_router, prefix=API_PREFIX)
 app.include_router(router=incasso_router, prefix=API_PREFIX)
+app.include_router(router=scanner_router, prefix=API_PREFIX)
 
 
 @app.get("/")

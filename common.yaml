@@ -7,6 +7,9 @@ services:
         env_file:
             - .docker/pg_conf.env
             - .docker/auth_opt.env
+            # Optional: without it the scan endpoint answers 503.
+            - path: .docker/scanner.env
+              required: false
         command: >
             bash -c "
             alembic history \

@@ -315,3 +315,6 @@ Pipfile
 
 # custom
 generated/
+
+# Scanner certificate, specific to each printer
+backend/certs/
