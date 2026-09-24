@@ -1,21 +1,23 @@
-@if (isLoggedIn()) {
-  <p-button
-    icon="fa"
-    title='Esci'
-    [class]="'fa-right-from-bracket'"
-    [outlined]="true"
-    [rounded]="true"
-    ariaLabel="Esci"
-    (onClick)="askForConfirmation()" />
-} @else {
-  <p-button
-    icon="fa"
-    title='Accedi'
-    [class]="'fa-right-to-bracket'"
-    [outlined]="true"
-    [rounded]="true"
-    ariaLabel="Accedi"
-    (onClick)="goToLogin()" />
+@if (!isOnLoginPage()) {
+  @if (isLoggedIn()) {
+    <p-button
+      icon="fa"
+      title='Esci'
+      [class]="'fa-right-from-bracket'"
+      [outlined]="true"
+      [rounded]="true"
+      ariaLabel="Esci"
+      (onClick)="askForConfirmation()" />
+  } @else {
+    <p-button
+      icon="fa"
+      title='Accedi'
+      [class]="'fa-right-to-bracket'"
+      [outlined]="true"
+      [rounded]="true"
+      ariaLabel="Accedi"
+      (onClick)="goToLogin()" />
+  }
 }
 
 <p-dialog
