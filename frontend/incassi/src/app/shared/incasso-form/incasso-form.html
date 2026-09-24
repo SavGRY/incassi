@@ -73,9 +73,20 @@
           icon='fa fa-regular fa-camera'
           ariaLabel='Scatta una foto'
           [rounded]='true' />
+        <p-button
+          icon='fa fa-regular fa-scanner-image'
+          ariaLabel='Scansiona con la stampante'
+          title='Scansiona con la stampante'
+          [rounded]='true'
+          [loading]='isScanning()'
+          [disabled]='isScanning()'
+          (onClick)='scan()' />
       </div>
     </div>
   </div>
+  @if (scanError(); as error) {
+    <p-message severity='error' size='small' variant='simple'>{{ error }}</p-message>
+  }
 
   <button
     type='submit'
