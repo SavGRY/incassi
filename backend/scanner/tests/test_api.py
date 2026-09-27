@@ -153,11 +153,69 @@ def test_scan_gives_up_when_the_document_never_arrives(auth_headers):
 
     assert response.status_code == 409
     # One job plus a bounded number of polls: it must not spin forever.
-    assert len(requests) == 1 + escl.MAX_DOCUMENT_ATTEMPTS
+    polls = [r for r in requests if r.method == "GET"]
+    assert len(polls) == escl.MAX_DOCUMENT_ATTEMPTS
 
 
-def test_scan_reports_a_busy_printer(auth_headers):
-    use_printer(lambda request: httpx.Response(503))
+def test_scan_cancels_the_job_it_gives_up_on(auth_headers):
+    def stuck_printer(request: httpx.Request) -> httpx.Response:
+        if request.method == "GET":
+            return httpx.Response(503)
+        return working_printer(request)
+
+    requests = use_printer(stuck_printer)
+
+    client.post(SCAN_URL, headers=auth_headers)
+
+    # Left open, the job would keep the printer busy for everyone else.
+    assert requests[-1].method == "DELETE"
+    assert requests[-1].url == f"{PRINTER_URL}{JOB_PATH}"
+
+
+def test_scan_cancels_the_job_when_the_document_goes_wrong(auth_headers):
+    def cancelled_printer(request: httpx.Request) -> httpx.Response:
+        # Someone cancelled the job from the printer panel.
+        if request.method == "GET":
+            return httpx.Response(404)
+        return working_printer(request)
+
+    requests = use_printer(cancelled_printer)
+
+    response = client.post(SCAN_URL, headers=auth_headers)
+
+    assert response.status_code == 502
+    assert requests[-1].method == "DELETE"
+
+
+def test_scan_reports_the_failure_even_when_the_job_cannot_be_cancelled(
+    auth_headers,
+):
+    def printer(request: httpx.Request) -> httpx.Response:
+        if request.method == "GET":
+            return httpx.Response(503)
+        if request.method == "DELETE":
+            raise httpx.ConnectTimeout("timed out", request=request)
+        return working_printer(request)
+
+    use_printer(printer)
+
+    response = client.post(SCAN_URL, headers=auth_headers)
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "The scanner is busy, try again shortly"
+
+
+def test_scan_does_not_cancel_a_job_that_worked(auth_headers):
+    requests = use_printer(working_printer)
+
+    client.post(SCAN_URL, headers=auth_headers)
+
+    assert "DELETE" not in [r.method for r in requests]
+
+
+@pytest.mark.parametrize("busy_status", [503, 409])
+def test_scan_reports_a_busy_printer(auth_headers, busy_status):
+    use_printer(lambda request: httpx.Response(busy_status))
 
     response = client.post(SCAN_URL, headers=auth_headers)
 
