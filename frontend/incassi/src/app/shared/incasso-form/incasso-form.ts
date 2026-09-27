@@ -10,7 +10,7 @@ import {Message} from '@openng/optimus-ui/message';
 import {SelectButton} from '@openng/optimus-ui/selectbutton';
 import type {FileSelectEvent} from '@openng/optimus-ui/types/fileupload';
 import type {Client} from '../../models/Client';
-import type {NewIncasso} from '../../models/incasso';
+import {NewIncasso, TipoPagamento, TipoPagamentoEnum} from '../../models/incasso';
 import {ClientService} from '../../services/client-service';
 import {ScannerService} from '../../services/scanner-service';
 
@@ -65,7 +65,7 @@ export class IncassoForm implements OnInit {
   form = new FormGroup({
     cliente: new FormControl<Client | null>(null, Validators.required),
     importo: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    tipoPagamento: new FormControl<'contanti' | 'assegno'>('contanti', {nonNullable: true}),
+    tipoPagamento: new FormControl<TipoPagamento>(TipoPagamentoEnum.CONTANTI, {nonNullable: true}),
   });
 
   private readonly formState = toSignal(this.form.statusChanges, {initialValue: this.form.status});
@@ -102,21 +102,20 @@ export class IncassoForm implements OnInit {
 
   searchClients(event: AutoCompleteCompleteEvent): void {
     this.autocomplete.set(this.clientService.search(event.query));
-    console.log(this.autocomplete());
   }
 
   onSubmit(): void {
-    if (this.form.invalid || !this.uploadedImage()) return;
+    const uploadedImage: File | null = this.uploadedImage();
+    if (this.form.invalid || !uploadedImage) return;
 
     const value = this.form.getRawValue();
     this.saveNewIncasso.emit({
       cliente: value.cliente as Client,
       importo: value.importo as number,
       tipoPagamento: value.tipoPagamento,
-      // biome-ignore lint/style/noNonNullAssertion: <Control done above>
-      immagine: this.uploadedImage()!,
+      immagine: uploadedImage,
     });
-    this.form.reset({tipoPagamento: 'contanti'});
+    this.form.reset({tipoPagamento: TipoPagamentoEnum.CONTANTI});
     this.uploadedImage.set(null);
   }
 }
