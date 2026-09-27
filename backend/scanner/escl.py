@@ -5,6 +5,7 @@ its URL in `Location`, then `GET {job}/NextDocument` hands back the image.
 """
 
 import asyncio
+import contextlib
 import xml.etree.ElementTree as ET
 from urllib.parse import urljoin, urlsplit
 
@@ -127,6 +128,8 @@ async def scan_a4(client: httpx.AsyncClient, scanner_url: str) -> bytes:
 
     While the lamp warms up the document is not ready yet: it is asked for
     again up to `MAX_DOCUMENT_ATTEMPTS` times, `RETRY_DELAY_SECONDS` apart.
+    A job that fails once created is cancelled, so that it does not keep the
+    printer busy.
 
     :param client: The HTTP client that talks to the scanner
     :param scanner_url: The base URL of the scanner, without a trailing slash
@@ -138,15 +141,34 @@ async def scan_a4(client: httpx.AsyncClient, scanner_url: str) -> bytes:
     """
     job_url = await _create_job(client, scanner_url)
 
-    for _ in range(MAX_DOCUMENT_ATTEMPTS):
-        document = await client.get(f"{job_url}/NextDocument")
-        if document.status_code == httpx.codes.OK:
-            return document.content
-        if document.status_code != httpx.codes.SERVICE_UNAVAILABLE:
-            raise ScannerError(f"NextDocument answered {document.status_code}")
-        await asyncio.sleep(RETRY_DELAY_SECONDS)
+    try:
+        for _ in range(MAX_DOCUMENT_ATTEMPTS):
+            document = await client.get(f"{job_url}/NextDocument")
+            if document.status_code == httpx.codes.OK:
+                return document.content
+            if document.status_code != httpx.codes.SERVICE_UNAVAILABLE:
+                raise ScannerError(f"NextDocument answered {document.status_code}")
+            await asyncio.sleep(RETRY_DELAY_SECONDS)
 
-    raise ScannerBusyError("The scanned document never arrived")
+        raise ScannerBusyError("The scanned document never arrived")
+    except BaseException:
+        # A job left open keeps the printer busy for everyone else.
+        await _cancel_job(client, job_url)
+        raise
+
+
+async def _cancel_job(client: httpx.AsyncClient, job_url: str) -> None:
+    """
+    Cancel a scan job given up on, as best as the printer allows
+
+    The job may already be gone, or the printer unreachable: either way the
+    error that made the scan fail is the one worth reporting, not this one.
+
+    :param client: The HTTP client that talks to the scanner
+    :param job_url: The absolute URL of the job
+    """
+    with contextlib.suppress(httpx.HTTPError):
+        await client.delete(job_url)
 
 
 async def _create_job(client: httpx.AsyncClient, scanner_url: str) -> str:
@@ -166,7 +188,8 @@ async def _create_job(client: httpx.AsyncClient, scanner_url: str) -> str:
         content=SCAN_SETTINGS,
         headers={"Content-Type": "text/xml"},
     )
-    if response.status_code == httpx.codes.SERVICE_UNAVAILABLE:
+    # Printers disagree on how to say they are busy: 503 or 409.
+    if response.status_code in (httpx.codes.SERVICE_UNAVAILABLE, httpx.codes.CONFLICT):
         raise ScannerBusyError("The scanner refused a new job")
     if response.status_code != httpx.codes.CREATED:
         raise ScannerError(f"ScanJobs answered {response.status_code}")
