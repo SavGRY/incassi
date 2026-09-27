@@ -12,6 +12,7 @@ from scanner import api, escl
 client = TestClient(app)
 
 SCAN_URL = f"{API_PREFIX}/scanner/scan"
+STATUS_URL = f"{API_PREFIX}/scanner/status"
 PRINTER_URL = "https://192.168.1.15"
 JOB_PATH = "/eSCL/ScanJobs/job-1"
 JPEG = b"\xff\xd8\xff\xe0 fake jpeg \xff\xd9"
@@ -199,11 +200,183 @@ def test_scan_never_follows_a_job_location_on_another_host(auth_headers):
     assert [r.url.host for r in requests] == ["192.168.1.15"]
 
 
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
+
+
 def test_scan_without_a_configured_scanner(auth_headers, monkeypatch):
     monkeypatch.delenv("SCANNER_URL")
     requests = use_printer(working_printer)
 
     response = client.post(SCAN_URL, headers=auth_headers)
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "No scanner configured"
+    assert requests == []
+
+
+CAPABILITIES_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<scan:ScannerCapabilities xmlns:scan="http://schemas.hp.com/imaging/escl/2011/05/03"
+                          xmlns:pwg="http://www.pwg.org/schemas/2010/12/sm">
+  <pwg:Version>2.6</pwg:Version>
+  <pwg:MakeAndModel>EPSON ET-4850 Series</pwg:MakeAndModel>
+</scan:ScannerCapabilities>"""
+
+
+def printer_in_state(
+    state: str, capabilities: str = CAPABILITIES_XML
+) -> Callable[[httpx.Request], httpx.Response]:
+    status_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<scan:ScannerStatus xmlns:scan="http://schemas.hp.com/imaging/escl/2011/05/03"
+                    xmlns:pwg="http://www.pwg.org/schemas/2010/12/sm">
+  <pwg:Version>2.6</pwg:Version>
+  <pwg:State>{state}</pwg:State>
+  <scan:Jobs>
+    <scan:JobInfo><pwg:JobState>Completed</pwg:JobState></scan:JobInfo>
+  </scan:Jobs>
+</scan:ScannerStatus>"""
+
+    def printer(request: httpx.Request) -> httpx.Response:
+        if request.method == "GET" and request.url.path == "/eSCL/ScannerStatus":
+            return httpx.Response(200, text=status_xml)
+        if request.method == "GET" and request.url.path == "/eSCL/ScannerCapabilities":
+            return httpx.Response(200, text=capabilities)
+        return httpx.Response(404)
+
+    return printer
+
+
+def test_status_requires_authentication():
+    requests = use_printer(printer_in_state("Idle"))
+
+    response = client.get(STATUS_URL)
+
+    assert response.status_code == 401
+    assert requests == []
+
+
+@pytest.mark.parametrize("state", ["Idle", "Processing", "Testing", "Stopped", "Down"])
+def test_status_returns_the_state_of_the_scanner(auth_headers, state):
+    requests = use_printer(printer_in_state(state))
+
+    response = client.get(STATUS_URL, headers=auth_headers)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "info": "EPSON ET-4850 Series",
+        "scanner_status": state,
+    }
+    assert {str(r.url) for r in requests} == {
+        f"{PRINTER_URL}/eSCL/ScannerCapabilities",
+        f"{PRINTER_URL}/eSCL/ScannerStatus",
+    }
+
+
+def test_status_works_when_the_scanner_does_not_tell_its_model(auth_headers):
+    # The model is only shown to the user: it must not stop a scan.
+    capabilities = """<scan:ScannerCapabilities
+    xmlns:scan="http://schemas.hp.com/imaging/escl/2011/05/03"
+    xmlns:pwg="http://www.pwg.org/schemas/2010/12/sm"/>"""
+    use_printer(printer_in_state("Idle", capabilities=capabilities))
+
+    response = client.get(STATUS_URL, headers=auth_headers)
+
+    assert response.status_code == 200
+    assert response.json() == {"info": "", "scanner_status": "Idle"}
+
+
+def test_status_reports_capabilities_the_scanner_cannot_give(auth_headers):
+    def printer(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/eSCL/ScannerCapabilities":
+            return httpx.Response(500)
+        return printer_in_state("Idle")(request)
+
+    use_printer(printer)
+
+    response = client.get(STATUS_URL, headers=auth_headers)
+
+    assert response.status_code == 502
+
+
+def test_status_reports_an_unreachable_scanner(auth_headers):
+    def offline_printer(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectTimeout("timed out on 192.168.1.15", request=request)
+
+    use_printer(offline_printer)
+
+    response = client.get(STATUS_URL, headers=auth_headers)
+
+    assert response.status_code == 504
+    # What httpx said, addresses included, stays in the backend.
+    assert response.json()["detail"] == "The scanner is unreachable"
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        httpx.Response(200, text="<html>not escl</html>"),
+        httpx.Response(200, text="<pwg:State>Idle"),
+        httpx.Response(500),
+    ],
+    ids=["not escl", "broken xml", "error status"],
+)
+def test_status_reports_a_scanner_answering_garbage(auth_headers, answer):
+    use_printer(lambda request: answer)
+
+    response = client.get(STATUS_URL, headers=auth_headers)
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == "The scanner answered something unexpected"
+
+
+def test_status_reports_a_state_escl_does_not_define(auth_headers):
+    use_printer(printer_in_state("Sleeping"))
+
+    response = client.get(STATUS_URL, headers=auth_headers)
+
+    assert response.status_code == 502
+
+
+def test_status_ignores_the_state_of_the_jobs(auth_headers):
+    # Only a job says `Idle` here: the scanner itself says nothing.
+    status_xml = """<scan:ScannerStatus
+    xmlns:scan="http://schemas.hp.com/imaging/escl/2011/05/03"
+    xmlns:pwg="http://www.pwg.org/schemas/2010/12/sm">
+  <scan:Jobs><scan:JobInfo><pwg:State>Idle</pwg:State></scan:JobInfo></scan:Jobs>
+</scan:ScannerStatus>"""
+    use_printer(lambda request: httpx.Response(200, text=status_xml))
+
+    response = client.get(STATUS_URL, headers=auth_headers)
+
+    assert response.status_code == 502
+
+
+@pytest.mark.anyio
+async def test_scanner_info_names_the_answer_that_failed():
+    def printer(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/eSCL/ScannerStatus":
+            return httpx.Response(500)
+        return printer_in_state("Idle")(request)
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(printer)) as scanner:
+        with pytest.raises(escl.ScannerError, match="ScannerStatus answered 500"):
+            await escl.get_scanner_info(scanner, PRINTER_URL, timeout=3)
+
+
+@pytest.mark.anyio
+async def test_scanner_info_reports_an_unknown_state_as_a_scanner_error():
+    transport = httpx.MockTransport(printer_in_state("Sleeping"))
+    async with httpx.AsyncClient(transport=transport) as scanner:
+        with pytest.raises(escl.ScannerError, match="unknown state"):
+            await escl.get_scanner_info(scanner, PRINTER_URL, timeout=3)
+
+
+def test_status_without_a_configured_scanner(auth_headers, monkeypatch):
+    monkeypatch.delenv("SCANNER_URL")
+    requests = use_printer(printer_in_state("Idle"))
+
+    response = client.get(STATUS_URL, headers=auth_headers)
 
     assert response.status_code == 503
     assert response.json()["detail"] == "No scanner configured"
