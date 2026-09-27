@@ -100,6 +100,10 @@ export class IncassoForm implements OnInit {
       });
   }
 
+  onClearImage() {
+    this.uploadedImage.set(null);
+  }
+
   searchClients(event: AutoCompleteCompleteEvent): void {
     this.autocomplete.set(this.clientService.search(event.query));
   }
