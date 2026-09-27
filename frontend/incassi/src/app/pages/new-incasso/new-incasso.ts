@@ -6,8 +6,8 @@ import {ConfirmDialog} from '@openng/optimus-ui/confirmdialog';
 import type {IncassiSubmission} from '../../models/incasso';
 import {ClientService} from '../../services/client-service';
 import {IncassiService} from '../../services/incassi-service';
-import {IncassoForm} from '../../shared/incasso-form/incasso-form';
 import {CREATE_INCASSO_ERRORS} from '../../shared/utils';
+import {IncassoForm} from './incasso-form/incasso-form';
 
 @Component({
   selector: 'app-new-incasso',

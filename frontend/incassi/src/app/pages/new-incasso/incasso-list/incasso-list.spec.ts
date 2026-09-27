@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import type {Client} from '../../models/Client';
-import {type NewIncasso, TipoPagamentoEnum} from '../../models/incasso';
-import {formatEuro} from '../utils';
+import type {Client} from '../../../models/Client';
+import {type NewIncasso, TipoPagamentoEnum} from '../../../models/incasso';
+import {formatEuro} from '../../../shared/utils';
 import {IncassoList} from './incasso-list';
 
 const ROSSI: Client = {code: 12, name: 'Rossi S.r.l.', address: null, city: 'Milano', province: 'MI'};
