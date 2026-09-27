@@ -4,16 +4,22 @@
   <ul class='m-0 flex list-none flex-col p-0'>
     @for (incasso of incassi(); track $index) {
       <li
-        class='flex items-center gap-2 border-b border-surface-200 py-2 last:border-b-0 dark:border-surface-700'
-        [class.bg-primary-50]='$index === selectedIndex()'>
-        <span class='min-w-0 flex-1'>
-          <span class='block truncate text-sm font-semibold'>{{ incasso.cliente.name }}</span>
-          <span class='block text-xs text-surface-500 dark:text-surface-400'>Cod. {{ incasso.cliente.code }}</span>
-        </span>
-        <p-tag
-          [value]="incasso.tipoPagamento === ASSEGNO ? 'Assegno' : 'Contanti'"
-          [severity]="incasso.tipoPagamento === ASSEGNO ? 'info' : 'success'" />
-        <span class='w-24 shrink-0 text-right text-sm'>{{ formatEuro(incasso.importo) }}</span>
+        class='flex items-center gap-2 rounded-lg border-b border-surface-200 px-2 py-2 last:border-b-0 dark:border-surface-700'
+        [class]="$index === selectedIndex() ? 'bg-primary-50 dark:bg-primary-950' : ''">
+        <!-- `w-0`: a long name is cut, it never widens the page. -->
+        <div class='flex w-0 min-w-0 flex-1 flex-col gap-1'>
+          <div class='flex items-baseline justify-between gap-2'>
+            <span class='truncate text-sm font-semibold'>{{ incasso.cliente.name }}</span>
+            <span class='shrink-0 text-sm'>{{ formatEuro(incasso.importo) }}</span>
+          </div>
+          <div class='flex items-center justify-between gap-2'>
+            <span class='text-xs text-surface-500 dark:text-surface-400'>Cod. {{ incasso.cliente.code }}</span>
+            <p-tag
+              class='text-xs'
+              [value]="incasso.tipoPagamento === ASSEGNO ? 'Assegno' : 'Contanti'"
+              [severity]="incasso.tipoPagamento === ASSEGNO ? 'info' : 'success'" />
+          </div>
+        </div>
         @if (!readonly()) {
           <p-button
             icon='fa fa-regular fa-pen'
@@ -33,7 +39,7 @@
       </li>
     }
   </ul>
-  <div class='flex justify-between pt-3 text-sm font-semibold'>
+  <div class='flex justify-between px-2 pt-3 text-sm font-semibold'>
     <span>Totale</span>
     <span data-testid='incassi-total'>{{ formatEuro(total()) }}</span>
   </div>
