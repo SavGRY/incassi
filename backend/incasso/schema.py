@@ -1,7 +1,7 @@
 from typing import Any
 from enum import Enum
 
-from pydantic import ConfigDict, BaseModel, model_validator
+from pydantic import ConfigDict, BaseModel, Field, model_validator
 from pydantic_core import from_json
 
 
@@ -47,7 +47,8 @@ class PaymentFromForm(BaseModel):
 
 
 class PaymentListModel(JsonStringModel):
-    payment_list: list[PaymentFromForm]
+    # An envelope with nobody on it means nothing.
+    payment_list: list[PaymentFromForm] = Field(min_length=1)
 
 
 class Payment(BaseModel):

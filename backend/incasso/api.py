@@ -18,6 +18,7 @@ from starlette.responses import FileResponse, Response
 
 from core.db.database import get_db
 from core.db.models import Incasso, Client, Payment, Media, User, TypeOfMedia
+from incasso.images import read_images
 from incasso.pdf import generate_incasso_pdf, generate_riepilogo_pdf
 from incasso.schema import PaymentListModel
 
@@ -35,11 +36,10 @@ async def create_incasso(
     list_of_images: list[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
-    # Set by the auth middleware: the token travels in the header, never in
-    # the URL, where it would end up in access logs and browser history. The
-    # middleware loads it in its own session: it is read again in this one,
-    # which the new rows are attached to.
     user = db.get(User, request.state.user.id)
+
+    # Every check runs before the first row is written.
+    images = await read_images(list_of_images or [])
 
     payment_to_add = []
     # mapping of client code and related client in db
@@ -98,7 +98,7 @@ async def create_incasso(
     incasso_pdf = generate_incasso_pdf(incasso=incasso)
     generated_media: list[Media] = [media_busta]
 
-    if list_of_images:
+    if images:
         media_riepilogo = create_media(
             user=user, incasso=incasso, type_of_media=TypeOfMedia.scan, db=db
         )
@@ -107,7 +107,7 @@ async def create_incasso(
         media_riepilogo.pdf_path = pdf_path
 
         try:
-            riepilogo_pdf = generate_riepilogo_pdf(list_of_images)
+            riepilogo_pdf = generate_riepilogo_pdf(images)
         except Exception as e:
             raise HTTPException(500, e)
         else:
