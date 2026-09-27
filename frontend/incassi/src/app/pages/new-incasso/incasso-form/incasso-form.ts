@@ -23,12 +23,12 @@ import {Message} from '@openng/optimus-ui/message';
 import {SelectButton} from '@openng/optimus-ui/selectbutton';
 import {Step, StepList, StepPanel, StepPanels, Stepper} from '@openng/optimus-ui/stepper';
 import type {FileSelectEvent} from '@openng/optimus-ui/types/fileupload';
-import type {Client} from '../../models/Client';
-import {type IncassiSubmission, type NewIncasso, type TipoPagamento, TipoPagamentoEnum} from '../../models/incasso';
-import {ClientService} from '../../services/client-service';
-import {ScannerService} from '../../services/scanner-service';
+import type {Client} from '../../../models/Client';
+import {type IncassiSubmission, type NewIncasso, type TipoPagamento, TipoPagamentoEnum} from '../../../models/incasso';
+import {ClientService} from '../../../services/client-service';
+import {ScannerService} from '../../../services/scanner-service';
+import {formatEuro, SCAN_ERRORS} from '../../../shared/utils';
 import {IncassoList} from '../incasso-list/incasso-list';
-import {formatEuro, SCAN_ERRORS} from '../utils';
 
 /** An image of the round, with the URL that shows its thumbnail. */
 interface RoundImage {

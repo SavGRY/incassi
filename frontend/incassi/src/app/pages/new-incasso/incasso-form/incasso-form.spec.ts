@@ -2,9 +2,9 @@ import {provideHttpClient} from '@angular/common/http';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter} from '@angular/router';
-import type {Client} from '../../models/Client';
-import {type IncassiSubmission, type NewIncasso, TipoPagamentoEnum} from '../../models/incasso';
-import {formatEuro, retryDelay, SCANNER_RECHECK_INTERVAL_MS} from '../utils';
+import type {Client} from '../../../models/Client';
+import {type IncassiSubmission, type NewIncasso, TipoPagamentoEnum} from '../../../models/incasso';
+import {formatEuro, retryDelay, SCANNER_RECHECK_INTERVAL_MS} from '../../../shared/utils';
 import {IncassoForm} from './incasso-form';
 
 const SCAN_URL = 'http://localhost:8000/api/v1/scanner/scan';

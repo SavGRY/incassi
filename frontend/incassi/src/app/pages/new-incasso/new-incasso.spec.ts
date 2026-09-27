@@ -4,8 +4,8 @@ import {type ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter, Router} from '@angular/router';
 import type {Client} from '../../models/Client';
 import {type IncassiSubmission, TipoPagamentoEnum} from '../../models/incasso';
-import {IncassoForm} from '../../shared/incasso-form/incasso-form';
 import {CREATE_INCASSO_ERRORS} from '../../shared/utils';
+import {IncassoForm} from './incasso-form/incasso-form';
 import {NewIncassoPage} from './new-incasso';
 
 const CREATE_URL = 'http://localhost:8000/api/v1/incasso/create';

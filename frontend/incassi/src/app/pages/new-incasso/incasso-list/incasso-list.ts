@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 import {Button} from '@openng/optimus-ui/button';
 import {Tag} from '@openng/optimus-ui/tag';
-import {type NewIncasso, TipoPagamentoEnum} from '../../models/incasso';
-import {formatEuro} from '../utils';
+import {type NewIncasso, TipoPagamentoEnum} from '../../../models/incasso';
+import {formatEuro} from '../../../shared/utils';
 
 @Component({
   selector: 'app-incasso-list',
