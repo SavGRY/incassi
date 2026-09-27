@@ -83,16 +83,20 @@
           ariaLabel='Scatta una foto'
           [rounded]='true' />
         <p-button
+          id='scan-button'
           icon='fa fa-regular fa-scanner-image'
-          ariaLabel='Scansiona con la stampante'
-          title='Scansiona con la stampante'
+          [ariaLabel]="isCheckingScanner() ? 'Cercando la stampante' : 'Scansiona con la stampante'"
+          [title]="isCheckingScanner() ? 'Cercando la stampante' : 'Scansiona con la stampante'"
           [rounded]='true'
-          [loading]='isScanning()'
-          [disabled]='isScanning()'
-          (onClick)='scan()' />
+          [loading]='isScanning() || isCheckingScanner()'
+          [disabled]='isScanning() || !isScannerAvailable()'
+          (onClick)='onScan()' />
       </div>
     </div>
   </div>
+  @if(scannerInfo()){
+    <p-message severity='success' size='small' variant='simple' [life]='3000'>Connesso a {{ scannerInfo() }}</p-message>
+  }
   @if (scanError(); as error) {
     <p-message severity='error' size='small' variant='simple'>{{ error }}</p-message>
   }

@@ -7,7 +7,11 @@
   (createCliente)="isClienteDrawerOpen.set(true)" />
 
 <p-drawer [(visible)]="isIncassoDrawerOpen" position="bottom" header="Nuovo incasso" styleClass="h-fit!">
-  <app-incasso-form (saveNewIncasso)="onSaveIncasso($event)" (emitGetClient)="onGetClient()" />
+  <!-- A template, not projected content: the drawer builds the form when it
+       opens and destroys it when it closes, with its scanner check. -->
+  <ng-template #content>
+    <app-incasso-form (saveNewIncasso)="onSaveIncasso($event)" (emitGetClient)="onGetClient()" />
+  </ng-template>
 </p-drawer>
 
 <p-drawer [(visible)]="isClienteDrawerOpen" position="bottom" header="Nuovo cliente" styleClass="h-fit!">
