@@ -16,7 +16,6 @@ from fastapi import (
 from sqlalchemy.orm import Session
 from starlette.responses import FileResponse, Response
 
-from auth.services import get_user_by_token
 from core.db.database import get_db
 from core.db.models import Incasso, Client, Payment, Media, User, TypeOfMedia
 from incasso.pdf import generate_incasso_pdf, generate_riepilogo_pdf
@@ -31,12 +30,16 @@ router = APIRouter(
 
 @router.post(path="/create", status_code=status.HTTP_201_CREATED)
 async def create_incasso(
-    token: str,
+    request: Request,
     list_of_payment: PaymentListModel = Form(...),
     list_of_images: list[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
-    user = get_user_by_token(token)
+    # Set by the auth middleware: the token travels in the header, never in
+    # the URL, where it would end up in access logs and browser history. The
+    # middleware loads it in its own session: it is read again in this one,
+    # which the new rows are attached to.
+    user = db.get(User, request.state.user.id)
 
     payment_to_add = []
     # mapping of client code and related client in db
