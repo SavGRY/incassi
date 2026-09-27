@@ -1,0 +1,21 @@
+import {HttpErrorResponse} from '@angular/common/http';
+
+/** What each backend answer means for someone standing next to the printer. */
+export const SCAN_ERRORS: Record<number, string> = {
+  409: 'Lo scanner è in uso, ad esempio da un altro dispositivo: il pulsante si riattiva appena si libera.',
+  503: 'Nessuno scanner configurato.',
+  504: 'Lo scanner non è raggiungibile: controlla che la stampante sia accesa.',
+};
+
+/**
+ * How often an available scanner is checked again: someone may start using
+ * the printer (a copy, a scan from another device) while the form is open.
+ */
+export const SCANNER_RECHECK_INTERVAL_MS = 15000;
+
+/** Delay before the n-th retry in a row (1-based): 1s, 2s, 4s, 8s, then 16s. */
+export const retryDelay = (attempt: number): number => Math.min(1000 * 2 ** (attempt - 1), 16000);
+
+/** Whether `error` is an HTTP answer with one of `statuses`. */
+export const hasHttpStatus = (error: unknown, statuses: number[]): boolean =>
+  error instanceof HttpErrorResponse && statuses.includes(error.status);
