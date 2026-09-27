@@ -10,7 +10,7 @@
   <!-- A template, not projected content: the drawer builds the form when it
        opens and destroys it when it closes, with its scanner check. -->
   <ng-template #content>
-    <app-incasso-form (saveNewIncasso)="onSaveIncasso($event)" (emitGetClient)="onGetClient()" />
+    <app-incasso-form (submitIncassi)="onSubmitIncassi($event)" (emitGetClient)="onGetClient()" />
   </ng-template>
 </p-drawer>
 

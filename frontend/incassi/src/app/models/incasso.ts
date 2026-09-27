@@ -12,3 +12,9 @@ export interface NewIncasso {
   importo: number;
   tipoPagamento: TipoPagamento;
 }
+
+/** What a round is made of: the incassi, and the images that prove them. */
+export interface IncassiSubmission {
+  incassi: NewIncasso[];
+  images: File[];
+}

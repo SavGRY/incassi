@@ -1,112 +1,253 @@
-<form [formGroup]='form' (ngSubmit)='onSubmit()' class='flex flex-col gap-5'>
-  <div class='flex flex-col gap-2 h-fit'>
-    <label for='incasso-cliente' class='text-sm font-medium leading-normal'>Cliente</label>
-    <p-autoComplete
-      inputId='incasso-cliente'
-      formControlName='cliente'
-      [suggestions]='autocomplete()'
-      (completeMethod)='searchClients($event)'
-      optionLabel="name"
-      optionValue='name'
-      placeholder='Cerca per ragione sociale o codice'
-      class='w-full'
-      [inputStyleClass]="'w-full'">
-      <ng-template #header>
-        <div class='font-bold px-4 py-2 flex w-full gap-2'>
-          <p class='m-0 w-1/4'>Codice</p>
-          <p class='m-0 w-3/4'> Ragione Sociale</p>
-        </div>
-        <hr>
-      </ng-template>
-      <ng-template let-client #item>
-        <div class='flex w-full gap-2'>
-          <div class='w-1/4'>
-            {{ client.code }}
+<p-stepper [value]='activeStep()' (valueChange)='goTo($event)'>
+  <p-step-list>
+    <p-step [value]='STEP_INCASSI'>Incassi</p-step>
+    <p-step [value]='STEP_IMAGES' [disabled]='!canGoToImages()'>Immagini</p-step>
+    <p-step [value]='STEP_SUMMARY' [disabled]='!canGoToSummary()'>Riepilogo</p-step>
+  </p-step-list>
+
+  <p-step-panels>
+    <p-step-panel [value]='STEP_INCASSI'>
+      <ng-template #content>
+        @if (activeStep() === STEP_INCASSI) {
+          <div class='flex flex-col gap-5'>
+            <form [formGroup]='form' (ngSubmit)='onSaveIncasso()' class='flex flex-col gap-5'>
+              <div class='flex flex-col gap-2 h-fit'>
+                <label for='incasso-cliente' class='text-sm font-medium leading-normal'>Cliente</label>
+                <p-autoComplete
+                  inputId='incasso-cliente'
+                  formControlName='cliente'
+                  [suggestions]='autocomplete()'
+                  (completeMethod)='searchClients($event)'
+                  optionLabel="name"
+                  placeholder='Cerca per ragione sociale o codice'
+                  class='w-full'
+                  [inputStyleClass]="'w-full'">
+                  <ng-template #header>
+                    <div class='font-bold px-4 py-2 flex w-full gap-2'>
+                      <p class='m-0 w-1/4'>Codice</p>
+                      <p class='m-0 w-3/4'> Ragione Sociale</p>
+                    </div>
+                    <hr>
+                  </ng-template>
+                  <ng-template let-client #item>
+                    <div class='flex w-full gap-2'>
+                      <div class='w-1/4'>
+                        {{ client.code }}
+                      </div>
+                      <div class='w-3/4'>
+                        {{ client.name }}
+                      </div>
+                    </div>
+                  </ng-template>
+                </p-autoComplete>
+              </div>
+
+              <div class='flex flex-col gap-2'>
+                <label for='incasso-importo' class='text-sm font-medium leading-normal'>Importo</label>
+                <input
+                  pInputText
+                  id='incasso-importo'
+                  type='number'
+                  step='0.01'
+                  formControlName='importo'
+                  placeholder='€ 0,00'
+                  class='w-full rounded-lg px-3 py-2 shadow-sm' />
+              </div>
+
+              <div class='flex flex-col gap-2'>
+                <span class='text-sm font-medium leading-normal'>Tipo di pagamento</span>
+                <p-selectbutton [options]='paymentType' formControlName='tipoPagamento' optionLabel='label' optionValue='value' />
+              </div>
+
+              <div class='flex gap-2'>
+                @if (editingIndex() !== null) {
+                  <p-button
+                    type='button'
+                    label='Annulla'
+                    severity='secondary'
+                    [outlined]='true'
+                    styleClass='w-full'
+                    class='flex-1'
+                    (onClick)='resetForm()' />
+                }
+                <p-button
+                  id='save-incasso'
+                  type='submit'
+                  [label]="editingIndex() === null ? 'Aggiungi incasso' : 'Aggiorna incasso'"
+                  [icon]="editingIndex() === null ? 'fa fa-regular fa-plus' : 'fa fa-regular fa-check'"
+                  [disabled]='!isFormValid()'
+                  styleClass='w-full'
+                  class='flex-1' />
+              </div>
+            </form>
+
+            <app-incasso-list
+              [incassi]='incassi()'
+              [selectedIndex]='editingIndex()'
+              (select)='onEditIncasso($event)'
+              (remove)='onRemoveIncasso($event)' />
+
+            <div class='flex justify-end'>
+              <p-button
+                id='to-images'
+                label='Avanti'
+                icon='fa fa-regular fa-arrow-right'
+                iconPos='right'
+                [disabled]='!canGoToImages()'
+                (onClick)='goTo(STEP_IMAGES)' />
+            </div>
           </div>
-          <div class='w-3/4'>
-            {{ client.name }}
-          </div>
-        </div>
+        }
       </ng-template>
-    </p-autoComplete>
-  </div>
+    </p-step-panel>
 
-  <div class='flex flex-col gap-2'>
-    <label for='incasso-importo' class='text-sm font-medium leading-normal'>Importo</label>
-    <input
-      pInputText
-      id='incasso-importo'
-      type='number'
-      step='0.01'
-      formControlName='importo'
-      placeholder='€ 0,00'
-      class='w-full rounded-lg px-3 py-2 shadow-sm' />
-  </div>
-  <div class='flex items-center gap-2'>
+    <p-step-panel [value]='STEP_IMAGES'>
+      <ng-template #content>
+        @if (activeStep() === STEP_IMAGES) {
+          <div class='flex flex-col gap-5'>
+            <div class='flex flex-row justify-center items-center gap-3'>
+              <p-fileupload
+                mode='basic'
+                accept='image/*'
+                [multiple]='true'
+                chooseIcon='fa fa-regular fa-images'
+                chooseStyleClass='p-button-icon-only'
+                chooseLabel=''
+                invalidFileTypeMessageSummary='{0}: tipo di file non valido.'
+                invalidFileTypeMessageDetail="Seleziona un'immagine."
+                invalidFileSizeMessageSummary='{0}: file troppo grande.'
+                invalidFileSizeMessageDetail="La dimensione massima e' {0}."
+                [maxFileSize]='10 * 1024 * 1024'
+                [customUpload]='true'
+                [chooseButtonProps]='sceltaImmagineProps'
+                (onSelect)='onSelectedFiles($event)'>
+                <ng-template #filelabel></ng-template>
+              </p-fileupload>
+              <p-button
+                icon='fa fa-regular fa-camera'
+                ariaLabel='Scatta una foto'
+                [rounded]='true' />
+              <p-button
+                id='scan-button'
+                icon='fa fa-regular fa-scanner-image'
+                [ariaLabel]="isCheckingScanner() ? 'Cercando la stampante' : 'Scansiona con la stampante'"
+                [title]="isCheckingScanner() ? 'Cercando la stampante' : 'Scansiona con la stampante'"
+                [rounded]='true'
+                [loading]='isScanning() || isCheckingScanner()'
+                [disabled]='isScanning() || !isScannerAvailable()'
+                (onClick)='onScan()' />
+            </div>
 
-    <div class='flex flex-col gap-2 grow-1'>
-      <span class='text-sm font-medium leading-normal'>Tipo di pagamento</span>
-      <p-selectbutton [options]='paymentType' formControlName='tipoPagamento' optionLabel='label' optionValue='value' />
-    </div>
+            @if (scannerInfo()) {
+              <p-message severity='success' size='small' variant='simple' [life]='3000'>Connesso a {{ scannerInfo() }}</p-message>
+            }
+            @if (scanError(); as error) {
+              <p-message severity='error' size='small' variant='simple'>{{ error }}</p-message>
+            }
 
-    <div class='flex flex-col gap-2'>
-      <div class='flex gap-2'>
-        <span class='text-sm font-medium leading-normal'>
-          Carica immagine
-        </span>
-          @if(uploadedImage()) {
-            <button class='cursor-pointer grow-1' title='Cancella Immagine' type='button' (click)='onClearImage()'>
-              <i class='fa fa-regular fa-trash text-red-500'></i>
-            </button>
-          }
-        </div>
-      <div class='flex flex-row justify-around items-center gap-2'>
-        <p-fileupload
-          mode='basic'
-          accept='image/*'
-          chooseIcon='fa fa-regular fa-images'
-          [chooseStyleClass]="uploadedImage() ? '1' : 'p-button-icon-only'"
-          [chooseLabel]="uploadedImage() ? '1' : '0'"
-          uploadIcon='fa fa-regular fa-images'
-          invalidFileTypeMessageSummary='{0}: tipo di file non valido.'
-          invalidFileTypeMessageDetail="Seleziona un'immagine."
-          invalidFileSizeMessageSummary='{0}: file troppo grande.'
-          invalidFileSizeMessageDetail="La dimensione massima e' {0}."
-          [maxFileSize]='10 * 1024 * 1024'
-          [customUpload]='true'
-          [chooseButtonProps]='sceltaImmagineProps'
-          (onSelect)='onSelectedFile($event)'>
-          <ng-template #filelabel></ng-template>
-        </p-fileupload>
-        <p-button
-          icon='fa fa-regular fa-camera'
-          ariaLabel='Scatta una foto'
-          [rounded]='true' />
-        <p-button
-          id='scan-button'
-          icon='fa fa-regular fa-scanner-image'
-          [ariaLabel]="isCheckingScanner() ? 'Cercando la stampante' : 'Scansiona con la stampante'"
-          [title]="isCheckingScanner() ? 'Cercando la stampante' : 'Scansiona con la stampante'"
-          [rounded]='true'
-          [loading]='isScanning() || isCheckingScanner()'
-          [disabled]='isScanning() || !isScannerAvailable()'
-          (onClick)='onScan()' />
-      </div>
-    </div>
-  </div>
-  @if(scannerInfo()){
-    <p-message severity='success' size='small' variant='simple' [life]='3000'>Connesso a {{ scannerInfo() }}</p-message>
-  }
-  @if (scanError(); as error) {
-    <p-message severity='error' size='small' variant='simple'>{{ error }}</p-message>
-  }
+            @if (images().length === 0) {
+              <p class='m-0 py-3 text-center text-sm text-surface-500 dark:text-surface-400'>
+                Aggiungi le foto o le scansioni di ricevute e assegni.
+              </p>
+            } @else {
+              <ul class='m-0 grid list-none grid-cols-3 gap-3 p-0'>
+                @for (image of images(); track image.url) {
+                  <li class='relative'>
+                    <p-image
+                      [src]='image.url'
+                      [alt]="'Immagine ' + ($index + 1)"
+                      [preview]='true'
+                      imageClass='aspect-[3/4] w-full rounded-lg object-cover' />
+                    <p-button
+                      icon='fa fa-regular fa-trash'
+                      severity='danger'
+                      size='small'
+                      [rounded]='true'
+                      [ariaLabel]="'Elimina immagine ' + ($index + 1)"
+                      class='absolute top-1 right-1'
+                      (onClick)='onRemoveImage($index)' />
+                  </li>
+                }
+              </ul>
+            }
 
-  <button
-    type='submit'
-    pButton
-    [disabled]='!isFormValid()'
-    [class]="!isFormValid() ? '!cursor-not-allowed' : ''"
-    class='w-full justify-center rounded-lg py-2'>
-    <span pButtonLabel>Salva incasso</span>
-  </button>
-</form>
+            <div class='flex justify-between'>
+              <p-button
+                label='Indietro'
+                icon='fa fa-regular fa-arrow-left'
+                severity='secondary'
+                [outlined]='true'
+                (onClick)='goTo(STEP_INCASSI)' />
+              <p-button
+                id='to-summary'
+                label='Avanti'
+                icon='fa fa-regular fa-arrow-right'
+                iconPos='right'
+                [disabled]='!canGoToSummary()'
+                (onClick)='goTo(STEP_SUMMARY)' />
+            </div>
+          </div>
+        }
+      </ng-template>
+    </p-step-panel>
+
+    <p-step-panel [value]='STEP_SUMMARY'>
+      <ng-template #content>
+        @if (activeStep() === STEP_SUMMARY) {
+          <div class='flex flex-col gap-5'>
+            <section class='flex flex-col gap-2' aria-labelledby='summary-incassi'>
+              <h3 id='summary-incassi' class='m-0 text-base font-semibold'>{{ incassi().length }} incassi</h3>
+              <app-incasso-list [incassi]='incassi()' [readonly]='true' />
+              <dl class='m-0 flex flex-col gap-1 text-sm' data-testid='totals-by-type'>
+                <div class='flex justify-between'>
+                  <dt>Contanti</dt>
+                  <dd class='m-0'>{{ formatEuro(totalsByType()[CONTANTI]) }}</dd>
+                </div>
+                <div class='flex justify-between'>
+                  <dt>Assegni</dt>
+                  <dd class='m-0'>{{ formatEuro(totalsByType()[ASSEGNO]) }}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section class='flex flex-col gap-2' aria-labelledby='summary-images'>
+              <h3 id='summary-images' class='m-0 text-base font-semibold'>{{ images().length }} immagini</h3>
+              <ul class='m-0 grid list-none grid-cols-4 gap-2 p-0'>
+                @for (image of images(); track image.url) {
+                  <li>
+                    <p-image
+                      [src]='image.url'
+                      [alt]="'Immagine ' + ($index + 1)"
+                      [preview]='true'
+                      imageClass='aspect-[3/4] w-full rounded-lg object-cover' />
+                  </li>
+                }
+              </ul>
+            </section>
+
+            @if (submitError(); as error) {
+              <p-message severity='error' size='small' variant='simple'>{{ error }}</p-message>
+            }
+
+            <div class='flex justify-between'>
+              <p-button
+                label='Indietro'
+                icon='fa fa-regular fa-arrow-left'
+                severity='secondary'
+                [outlined]='true'
+                [disabled]='isSubmitting()'
+                (onClick)='goTo(STEP_IMAGES)' />
+              <p-button
+                id='submit-incassi'
+                label='Genera documenti'
+                icon='fa fa-regular fa-file-pdf'
+                [loading]='isSubmitting()'
+                [disabled]='isSubmitting()'
+                (onClick)='onSubmit()' />
+            </div>
+          </div>
+        }
+      </ng-template>
+    </p-step-panel>
+  </p-step-panels>
+</p-stepper>

@@ -39,25 +39,23 @@ describe('Home', () => {
     httpMock.expectNone(STATUS_URL);
   });
 
-  it('looks for the scanner when the incasso drawer opens', async () => {
+  it('builds the incasso form when the drawer opens, without asking for the scanner yet', async () => {
     fixture.componentInstance.isIncassoDrawerOpen.set(true);
     await render();
 
     expect(incassoForm()).not.toBeNull();
-    httpMock.expectOne(STATUS_URL).flush({info: 'EPSON ET-4850 Series', scanner_status: 'Idle'});
+    // The form only looks for the scanner on its images step.
+    httpMock.expectNone(STATUS_URL);
   });
 
-  it('stops looking for the scanner when the incasso drawer closes', async () => {
+  it('destroys the incasso form when the drawer closes', async () => {
     fixture.componentInstance.isIncassoDrawerOpen.set(true);
     await render();
-    httpMock.expectOne(STATUS_URL).flush({info: 'EPSON ET-4850 Series', scanner_status: 'Processing'});
 
     fixture.componentInstance.isIncassoDrawerOpen.set(false);
     await vi.advanceTimersByTimeAsync(1000);
     fixture.detectChanges();
-    await vi.advanceTimersByTimeAsync(160000);
 
     expect(incassoForm()).toBeNull();
-    httpMock.expectNone(STATUS_URL);
   });
 });

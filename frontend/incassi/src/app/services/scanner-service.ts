@@ -1,7 +1,7 @@
 import {HttpClient} from '@angular/common/http';
-import {Injectable, inject, type ResourceRef, signal} from '@angular/core';
-import {rxResource} from '@angular/core/rxjs-interop';
-import {catchError, distinctUntilChanged, EMPTY, map, type Observable, of, repeat, timer} from 'rxjs';
+import {computed, Injectable, inject, type ResourceRef, signal} from '@angular/core';
+import {rxResource, toObservable} from '@angular/core/rxjs-interop';
+import {catchError, distinctUntilChanged, EMPTY, map, type Observable, of, repeat, switchMap, timer} from 'rxjs';
 import {type ScannerAvailability, ScannerResponse, ScannerStatusEnum} from '../models/Scanner';
 import {hasHttpStatus, retryDelay, SCANNER_RECHECK_INTERVAL_MS} from '../shared/utils';
 
@@ -24,10 +24,17 @@ export class ScannerService {
    * Whether the scanner can take a scan, as a resource bound to the caller:
    * call it while a component is being built (e.g. a field initializer) and
    * the resource, with any pending retry or check, dies with that component.
+   *
+   * @param enabled The scanner is only asked while this is true: turning it
+   *   false stops the checks, turning it true again starts them over.
    */
-  createScannerStatus(): ResourceRef<ScannerAvailability> {
+  createScannerStatus(enabled: () => boolean = () => true): ResourceRef<ScannerAvailability> {
+    // Not `params`: a resource whose params turn `undefined` goes idle but
+    // keeps its stream running. `switchMap` drops the checks instead.
+    const enabled$ = toObservable(computed(enabled));
     return rxResource({
-      stream: () => this.watchAvailability(),
+      stream: () =>
+        enabled$.pipe(switchMap((on) => (on ? this.watchAvailability() : of<ScannerAvailability>('checking')))),
       defaultValue: 'checking',
     });
   }

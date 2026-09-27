@@ -1,5 +1,5 @@
 import {HttpErrorResponse} from '@angular/common/http';
-import {hasHttpStatus, retryDelay} from './utils';
+import {formatEuro, hasHttpStatus, retryDelay} from './utils';
 
 describe('retryDelay', () => {
   it('doubles the wait at every retry', () => {
@@ -22,5 +22,12 @@ describe('hasHttpStatus', () => {
 
   it('does not match an error that is not an HTTP answer', () => {
     expect(hasHttpStatus(new Error('The scanner is Processing'), [401, 503])).toBe(false);
+  });
+});
+
+describe('formatEuro', () => {
+  it('writes the amount the italian way, with two decimals', () => {
+    // The space before the symbol is a non-breaking one.
+    expect(formatEuro(1234.5)).toBe('1234,50\u00a0€');
   });
 });
