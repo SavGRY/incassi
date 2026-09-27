@@ -33,6 +33,7 @@
     "@openng/optimus-ui-tailwindcss": "^2.0.2",
     "@openng/optimus-ui-themes": "^2.0.2",
     "@tailwindcss/postcss": "^4.1.18",
+    "jscanify": "^1.4.3",
     "postcss": "^8.5.26",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.1.18",
