@@ -1,3 +1,4 @@
+import asyncio
 import ssl
 from collections.abc import Callable
 
@@ -150,7 +151,7 @@ def test_scan_gives_up_when_the_document_never_arrives(auth_headers):
 
     response = client.post(SCAN_URL, headers=auth_headers)
 
-    assert response.status_code == 503
+    assert response.status_code == 409
     # One job plus a bounded number of polls: it must not spin forever.
     assert len(requests) == 1 + escl.MAX_DOCUMENT_ATTEMPTS
 
@@ -160,7 +161,7 @@ def test_scan_reports_a_busy_printer(auth_headers):
 
     response = client.post(SCAN_URL, headers=auth_headers)
 
-    assert response.status_code == 503
+    assert response.status_code == 409
     assert response.json()["detail"] == "The scanner is busy, try again shortly"
 
 
@@ -203,6 +204,62 @@ def test_scan_never_follows_a_job_location_on_another_host(auth_headers):
 @pytest.fixture
 def anyio_backend():
     return "asyncio"
+
+
+@pytest.mark.anyio
+async def test_scan_refuses_a_second_scan_while_one_is_running(auth_headers):
+    # Two devices pressing "scan" together: the first holds the printer until
+    # the second has had its answer.
+    second_answered = asyncio.Event()
+
+    async def slow_printer(request: httpx.Request) -> httpx.Response:
+        if request.method == "GET":
+            await second_answered.wait()
+        return working_printer(request)
+
+    requests = use_printer(slow_printer)
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test"
+    ) as devices:
+        first = asyncio.create_task(devices.post(SCAN_URL, headers=auth_headers))
+        while not requests:
+            await asyncio.sleep(0)
+
+        try:
+            # Should the second scan reach the printer, it would wait forever.
+            second = await asyncio.wait_for(
+                devices.post(SCAN_URL, headers=auth_headers), timeout=2
+            )
+        finally:
+            second_answered.set()
+        first = await first
+
+    assert second.status_code == 409
+    assert second.json()["detail"] == "The scanner is busy, try again shortly"
+    assert first.status_code == 200
+    assert first.content == JPEG
+    # The second scan never reached the printer.
+    assert [r.method for r in requests].count("POST") == 1
+
+
+def test_scan_can_run_again_once_the_previous_one_is_over(auth_headers):
+    use_printer(working_printer)
+
+    first = client.post(SCAN_URL, headers=auth_headers)
+    second = client.post(SCAN_URL, headers=auth_headers)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+
+
+def test_scan_can_run_again_after_a_failed_one(auth_headers):
+    use_printer(lambda request: httpx.Response(400))
+    assert client.post(SCAN_URL, headers=auth_headers).status_code == 502
+
+    use_printer(working_printer)
+
+    assert client.post(SCAN_URL, headers=auth_headers).status_code == 200
 
 
 def test_scan_without_a_configured_scanner(auth_headers, monkeypatch):

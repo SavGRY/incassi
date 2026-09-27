@@ -1,3 +1,4 @@
+import asyncio
 import os
 import ssl
 from collections.abc import AsyncIterator
@@ -12,6 +13,11 @@ from scanner.schema import ScannerResponse
 router = APIRouter(prefix="/scanner", tags=["scanner"])
 
 SCANNER_TIMEOUT_SECONDS = 60
+
+# There is one printer for every device using the app: a second scan while one
+# is running is refused here, before it reaches the printer. It only holds
+# within one process, i.e. as long as uvicorn runs a single worker.
+_scan_lock = asyncio.Lock()
 
 
 def get_tls_verification() -> ssl.SSLContext | bool:
@@ -102,8 +108,9 @@ async def get_status(
     response_class=Response,
     responses={
         200: {"content": {"image/jpeg": {}}, "description": "The scan"},
+        409: {"description": "The scanner is busy, try again shortly"},
         502: {"description": "The scanner could not complete the scan"},
-        503: {"description": "The scanner is busy, or none is configured"},
+        503: {"description": "No scanner configured"},
         504: {"description": "The scanner is unreachable"},
     },
 )
@@ -117,9 +124,9 @@ async def scan(client: httpx.AsyncClient = Depends(get_scanner_client)):
     :param client: The HTTP client that talks to the scanner, defaults to
         Depends(get_scanner_client)
     :return: The scanned sheet as `image/jpeg`
-    :raises HTTPException: 503 when the scanner is busy or none is
-        configured, 502 when it cannot complete the scan, 504 when it is
-        unreachable
+    :raises HTTPException: 409 when the scanner is busy, e.g. with a scan
+        from another device, 503 when no scanner is configured, 502 when it
+        cannot complete the scan, 504 when it is unreachable
     """
     scanner_url = os.getenv("SCANNER_URL")
     if not scanner_url:
@@ -128,11 +135,20 @@ async def scan(client: httpx.AsyncClient = Depends(get_scanner_client)):
             detail="No scanner configured",
         )
 
+    # `locked()` and the acquire below never yield in between: no other
+    # request can slip in.
+    if _scan_lock.locked():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The scanner is busy, try again shortly",
+        )
+
     try:
-        image = await scan_a4(client, scanner_url.rstrip("/"))
+        async with _scan_lock:
+            image = await scan_a4(client, scanner_url.rstrip("/"))
     except ScannerBusyError:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=status.HTTP_409_CONFLICT,
             detail="The scanner is busy, try again shortly",
         )
     except ScannerError:
