@@ -1,15 +1,17 @@
 <p-stepper [value]='activeStep()' (valueChange)='goTo($event)'>
   <p-step-list>
-    <p-step [value]='STEP_INCASSI'>Incassi</p-step>
-    <p-step [value]='STEP_IMAGES' [disabled]='!canGoToImages()'>Immagini</p-step>
-    <p-step [value]='STEP_SUMMARY' [disabled]='!canGoToSummary()'>Riepilogo</p-step>
+    <!-- Without the side padding of each step the three fit a phone screen. -->
+    <p-step [value]='STEP_INCASSI' class='px-0!'><span class='text-sm'>Incassi</span></p-step>
+    <p-step [value]='STEP_IMAGES' [disabled]='!canGoToImages()' class='px-0!'><span class='text-sm'>Immagini</span></p-step>
+    <p-step [value]='STEP_SUMMARY' [disabled]='!canGoToSummary()' class='px-0!'><span class='text-sm'>Riepilogo</span></p-step>
   </p-step-list>
 
-  <p-step-panels>
-    <p-step-panel [value]='STEP_INCASSI'>
+  <!-- Aligned with the page title, on the page background. -->
+  <p-step-panels class='p-0!'>
+    <p-step-panel [value]='STEP_INCASSI' class='bg-transparent!'>
       <ng-template #content>
         @if (activeStep() === STEP_INCASSI) {
-          <div class='flex flex-col gap-5'>
+          <div class='flex flex-col gap-5 pt-6'>
             <form [formGroup]='form' (ngSubmit)='onSaveIncasso()' class='flex flex-col gap-5'>
               <div class='flex flex-col gap-2 h-fit'>
                 <label for='incasso-cliente' class='text-sm font-medium leading-normal'>Cliente</label>
@@ -66,8 +68,6 @@
                     label='Annulla'
                     severity='secondary'
                     [outlined]='true'
-                    styleClass='w-full'
-                    class='flex-1'
                     (onClick)='resetForm()' />
                 }
                 <p-button
@@ -101,10 +101,10 @@
       </ng-template>
     </p-step-panel>
 
-    <p-step-panel [value]='STEP_IMAGES'>
+    <p-step-panel [value]='STEP_IMAGES' class='bg-transparent!'>
       <ng-template #content>
         @if (activeStep() === STEP_IMAGES) {
-          <div class='flex flex-col gap-5'>
+          <div class='flex flex-col gap-5 pt-6'>
             <div class='flex flex-row justify-center items-center gap-3'>
               <p-fileupload
                 mode='basic'
@@ -157,6 +157,7 @@
                       [src]='image.url'
                       [alt]="'Immagine ' + ($index + 1)"
                       [preview]='true'
+                      styleClass='block w-full'
                       imageClass='aspect-[3/4] w-full rounded-lg object-cover' />
                     <p-button
                       icon='fa fa-regular fa-trash'
@@ -191,14 +192,14 @@
       </ng-template>
     </p-step-panel>
 
-    <p-step-panel [value]='STEP_SUMMARY'>
+    <p-step-panel [value]='STEP_SUMMARY' class='bg-transparent!'>
       <ng-template #content>
         @if (activeStep() === STEP_SUMMARY) {
-          <div class='flex flex-col gap-5'>
+          <div class='flex flex-col gap-5 pt-6'>
             <section class='flex flex-col gap-2' aria-labelledby='summary-incassi'>
-              <h3 id='summary-incassi' class='m-0 text-base font-semibold'>{{ incassi().length }} incassi</h3>
+              <h3 id='summary-incassi' class='m-0 text-base font-semibold'>{{ incassi().length }} {{ incassi().length === 1 ? 'incasso' : 'incassi' }}</h3>
               <app-incasso-list [incassi]='incassi()' [readonly]='true' />
-              <dl class='m-0 flex flex-col gap-1 text-sm' data-testid='totals-by-type'>
+              <dl class='m-0 flex flex-col gap-1 px-2 text-sm' data-testid='totals-by-type'>
                 <div class='flex justify-between'>
                   <dt>Contanti</dt>
                   <dd class='m-0'>{{ formatEuro(totalsByType()[CONTANTI]) }}</dd>
@@ -211,7 +212,7 @@
             </section>
 
             <section class='flex flex-col gap-2' aria-labelledby='summary-images'>
-              <h3 id='summary-images' class='m-0 text-base font-semibold'>{{ images().length }} immagini</h3>
+              <h3 id='summary-images' class='m-0 text-base font-semibold'>{{ images().length }} {{ images().length === 1 ? 'immagine' : 'immagini' }}</h3>
               <ul class='m-0 grid list-none grid-cols-4 gap-2 p-0'>
                 @for (image of images(); track image.url) {
                   <li>
@@ -219,6 +220,7 @@
                       [src]='image.url'
                       [alt]="'Immagine ' + ($index + 1)"
                       [preview]='true'
+                      styleClass='block w-full'
                       imageClass='aspect-[3/4] w-full rounded-lg object-cover' />
                   </li>
                 }

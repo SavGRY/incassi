@@ -673,7 +673,8 @@ describe('IncassoForm', () => {
     });
 
     it('shows how many images there are', () => {
-      expect(element().textContent).toContain('1 immagini');
+      expect(element().textContent).toContain('1 immagine');
+      expect(element().textContent).toContain('2 incassi');
       expect(element().querySelectorAll('p-image')).toHaveLength(1);
     });
 
