@@ -34,8 +34,8 @@ export class Home {
     this.clientService.askForClient();
   }
 
-  onSaveIncasso(incasso: NewIncasso): void {
-    this.incassiService.createIncasso(incasso);
+  async onSaveIncasso({incasso, immagine}: {incasso: NewIncasso; immagine: File}): Promise<void> {
+    await this.incassiService.createIncasso([incasso], [immagine]);
     this.isIncassoDrawerOpen.set(false);
   }
 

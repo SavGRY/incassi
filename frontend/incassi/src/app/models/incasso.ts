@@ -11,5 +11,4 @@ export interface NewIncasso {
   cliente: Client;
   importo: number;
   tipoPagamento: TipoPagamento;
-  immagine: File;
 }

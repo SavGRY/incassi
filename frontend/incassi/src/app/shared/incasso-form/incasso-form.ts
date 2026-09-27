@@ -82,7 +82,7 @@ export class IncassoForm implements OnInit {
 
   isFormValid = computed(() => this.formState() === 'VALID' && this.uploadedImage() !== null);
 
-  saveNewIncasso = output<NewIncasso>();
+  saveNewIncasso = output<{incasso: NewIncasso; immagine: File}>();
 
   ngOnInit(): void {
     this.emitGetClient.emit();
@@ -128,9 +128,11 @@ export class IncassoForm implements OnInit {
 
     const value = this.form.getRawValue();
     this.saveNewIncasso.emit({
-      cliente: value.cliente as Client,
-      importo: value.importo as number,
-      tipoPagamento: value.tipoPagamento,
+      incasso: {
+        cliente: value.cliente as Client,
+        importo: value.importo as number,
+        tipoPagamento: value.tipoPagamento,
+      },
       immagine: uploadedImage,
     });
     this.form.reset({tipoPagamento: TipoPagamentoEnum.CONTANTI});
