@@ -5,9 +5,12 @@ its URL in `Location`, then `GET {job}/NextDocument` hands back the image.
 """
 
 import asyncio
+import xml.etree.ElementTree as ET
 from urllib.parse import urljoin, urlsplit
 
 import httpx
+
+from scanner.schema import ScannerResponse, ScannerStatus
 
 __all__ = [
     "MAX_DOCUMENT_ATTEMPTS",
@@ -15,6 +18,7 @@ __all__ = [
     "ScannerBusyError",
     "ScannerError",
     "scan_a4",
+    "get_scanner_info",
 ]
 
 # While the lamp warms up `NextDocument` answers 503: poll for about 30s.
@@ -45,16 +49,93 @@ SCAN_SETTINGS = """<?xml version="1.0" encoding="UTF-8"?>
 </scan:ScanSettings>"""
 
 
+ESCL_NAMESPACES = {"pwg": "http://www.pwg.org/schemas/2010/12/sm"}
+
+
 class ScannerError(Exception):
-    """The scanner answered something a scan cannot go on with."""
+    """
+    The scanner answered something a scan cannot go on with
+    """
 
 
 class ScannerBusyError(ScannerError):
-    """The scanner is working on another job, or still warming up."""
+    """
+    The scanner is working on another job, or still warming up
+    """
+
+
+async def get_scanner_info(
+    client: httpx.AsyncClient, scanner_url: str, timeout: float
+) -> ScannerResponse:
+    """
+    Read the model of the scanner and its state
+
+    The state comes from `ScannerStatus`, and only the scanner-wide
+    `<pwg:State>` counts, not the state of the jobs listed in the same
+    document. The model comes from `ScannerCapabilities`: it is only shown to
+    the user, so a scanner that does not tell it can still take a scan.
+
+    :param client: The HTTP client that talks to the scanner
+    :param scanner_url: The base URL of the scanner, without a trailing slash
+    :param timeout: How many seconds to wait for each answer
+    :return: The model of the scanner, empty when unknown, and its state
+    :raises ScannerError: When an answer is not a 200 or not valid XML, or the
+        state is missing or one eSCL does not define
+    :raises httpx.HTTPError: When the scanner cannot be reached in time
+    """
+    capabilities_response = await client.get(
+        f"{scanner_url}/eSCL/ScannerCapabilities", timeout=timeout
+    )
+    status_response = await client.get(
+        f"{scanner_url}/eSCL/ScannerStatus", timeout=timeout
+    )
+    for name, response in (
+        ("ScannerCapabilities", capabilities_response),
+        ("ScannerStatus", status_response),
+    ):
+        if response.status_code != httpx.codes.OK:
+            raise ScannerError(f"{name} answered {response.status_code}")
+
+    # ElementTree never fetches external entities, and the expat it ships
+    # with (>= 2.4) stops the entity expansion bombs.
+    try:
+        capabilities_root = ET.fromstring(capabilities_response.content)
+        status_root = ET.fromstring(status_response.content)
+    except ET.ParseError as error:
+        raise ScannerError("The scanner answered invalid XML") from error
+
+    make_and_model = capabilities_root.findtext(
+        "pwg:MakeAndModel", default="", namespaces=ESCL_NAMESPACES
+    )
+    # A direct child of the root: the scanner-wide state, not the
+    # `<pwg:JobState>` of each job listed under `<scan:Jobs>`.
+    state = status_root.findtext("pwg:State", namespaces=ESCL_NAMESPACES)
+    if not state or not state.strip():
+        raise ScannerError("ScannerStatus did not say the scanner state")
+
+    try:
+        scanner_status = ScannerStatus(state.strip())
+    except ValueError as error:
+        raise ScannerError("ScannerStatus said an unknown state") from error
+
+    return ScannerResponse(info=make_and_model.strip(), scanner_status=scanner_status)
 
 
 async def scan_a4(client: httpx.AsyncClient, scanner_url: str) -> bytes:
-    """Scan an A4 sheet from the platen and return it as a JPEG."""
+    """
+    Scan an A4 sheet from the platen
+
+    While the lamp warms up the document is not ready yet: it is asked for
+    again up to `MAX_DOCUMENT_ATTEMPTS` times, `RETRY_DELAY_SECONDS` apart.
+
+    :param client: The HTTP client that talks to the scanner
+    :param scanner_url: The base URL of the scanner, without a trailing slash
+    :return: The scanned sheet as JPEG bytes
+    :raises ScannerBusyError: When the scanner refuses the job or the document
+        never arrives
+    :raises ScannerError: When the scanner answers something unexpected
+    :raises httpx.HTTPError: When the scanner cannot be reached
+    """
     job_url = await _create_job(client, scanner_url)
 
     for _ in range(MAX_DOCUMENT_ATTEMPTS):
@@ -69,6 +150,17 @@ async def scan_a4(client: httpx.AsyncClient, scanner_url: str) -> bytes:
 
 
 async def _create_job(client: httpx.AsyncClient, scanner_url: str) -> str:
+    """
+    Create a scan job with `SCAN_SETTINGS`
+
+    :param client: The HTTP client that talks to the scanner
+    :param scanner_url: The base URL of the scanner, without a trailing slash
+    :return: The absolute URL of the job, always on the host of `scanner_url`
+    :raises ScannerBusyError: When the scanner refuses a new job
+    :raises ScannerError: When the job is not created, its location is missing
+        or points to another host
+    :raises httpx.HTTPError: When the scanner cannot be reached
+    """
     response = await client.post(
         f"{scanner_url}/eSCL/ScanJobs",
         content=SCAN_SETTINGS,
