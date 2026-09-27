@@ -94,4 +94,18 @@ describe('IncassoForm', () => {
     expect(errorText()).toBeUndefined();
     httpMock.expectOne(SCAN_URL).flush(new Blob(['jpeg'], {type: 'image/jpeg'}));
   });
+
+  it('lets the user remove the chosen image', () => {
+    const clearButton = (): HTMLButtonElement | null =>
+      fixture.nativeElement.querySelector('button[title="Cancella Immagine"]');
+    expect(clearButton()).toBeNull();
+
+    component.uploadedImage.set(new File(['jpeg'], 'ricevuta.jpg', {type: 'image/jpeg'}));
+    fixture.detectChanges();
+    clearButton()?.click();
+    fixture.detectChanges();
+
+    expect(component.uploadedImage()).toBeNull();
+    expect(clearButton()).toBeNull();
+  });
 });

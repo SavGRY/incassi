@@ -50,7 +50,16 @@
     </div>
 
     <div class='flex flex-col gap-2'>
-      <span class='text-sm font-medium leading-normal'>Carica immagine</span>
+      <div class='flex gap-2'>
+        <span class='text-sm font-medium leading-normal'>
+          Carica immagine
+        </span>
+          @if(uploadedImage()) {
+            <button class='cursor-pointer grow-1' title='Cancella Immagine' type='button' (click)='onClearImage()'>
+              <i class='fa fa-regular fa-trash text-red-500'></i>
+            </button>
+          }
+        </div>
       <div class='flex flex-row justify-around items-center gap-2'>
         <p-fileupload
           mode='basic'
