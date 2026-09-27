@@ -1,0 +1,40 @@
+@if (incassi().length === 0) {
+  <p class='m-0 py-3 text-center text-sm text-surface-500 dark:text-surface-400'>Nessun incasso inserito.</p>
+} @else {
+  <ul class='m-0 flex list-none flex-col p-0'>
+    @for (incasso of incassi(); track $index) {
+      <li
+        class='flex items-center gap-2 border-b border-surface-200 py-2 last:border-b-0 dark:border-surface-700'
+        [class.bg-primary-50]='$index === selectedIndex()'>
+        <span class='min-w-0 flex-1'>
+          <span class='block truncate text-sm font-semibold'>{{ incasso.cliente.name }}</span>
+          <span class='block text-xs text-surface-500 dark:text-surface-400'>Cod. {{ incasso.cliente.code }}</span>
+        </span>
+        <p-tag
+          [value]="incasso.tipoPagamento === ASSEGNO ? 'Assegno' : 'Contanti'"
+          [severity]="incasso.tipoPagamento === ASSEGNO ? 'info' : 'success'" />
+        <span class='w-24 shrink-0 text-right text-sm'>{{ formatEuro(incasso.importo) }}</span>
+        @if (!readonly()) {
+          <p-button
+            icon='fa fa-regular fa-pen'
+            severity='secondary'
+            [text]='true'
+            [rounded]='true'
+            [ariaLabel]="'Modifica incasso di ' + incasso.cliente.name"
+            (onClick)='select.emit($index)' />
+          <p-button
+            icon='fa fa-regular fa-trash'
+            severity='danger'
+            [text]='true'
+            [rounded]='true'
+            [ariaLabel]="'Elimina incasso di ' + incasso.cliente.name"
+            (onClick)='remove.emit($index)' />
+        }
+      </li>
+    }
+  </ul>
+  <div class='flex justify-between pt-3 text-sm font-semibold'>
+    <span>Totale</span>
+    <span data-testid='incassi-total'>{{ formatEuro(total()) }}</span>
+  </div>
+}

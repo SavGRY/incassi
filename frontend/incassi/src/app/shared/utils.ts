@@ -19,3 +19,7 @@ export const retryDelay = (attempt: number): number => Math.min(1000 * 2 ** (att
 /** Whether `error` is an HTTP answer with one of `statuses`. */
 export const hasHttpStatus = (error: unknown, statuses: number[]): boolean =>
   error instanceof HttpErrorResponse && statuses.includes(error.status);
+
+/** An amount as Italians read it, e.g. `120,50 €`. */
+export const formatEuro = (amount: number): string =>
+  new Intl.NumberFormat('it-IT', {style: 'currency', currency: 'EUR'}).format(amount);

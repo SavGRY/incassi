@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {Drawer} from '@openng/optimus-ui/drawer';
 import type {NewClient} from '../../models/Client';
-import type {NewIncasso} from '../../models/incasso';
+import type {IncassiSubmission} from '../../models/incasso';
 import {ClientService} from '../../services/client-service';
 import {DocumentService} from '../../services/document-service';
 import {IncassiService} from '../../services/incassi-service';
@@ -34,8 +34,8 @@ export class Home {
     this.clientService.askForClient();
   }
 
-  async onSaveIncasso({incasso, immagine}: {incasso: NewIncasso; immagine: File}): Promise<void> {
-    await this.incassiService.createIncasso([incasso], [immagine]);
+  async onSubmitIncassi({incassi, images}: IncassiSubmission): Promise<void> {
+    await this.incassiService.createIncasso(incassi, images);
     this.isIncassoDrawerOpen.set(false);
   }
 
