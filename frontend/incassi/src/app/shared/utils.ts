@@ -23,3 +23,10 @@ export const hasHttpStatus = (error: unknown, statuses: number[]): boolean =>
 /** An amount as Italians read it, e.g. `120,50 €`. */
 export const formatEuro = (amount: number): string =>
   new Intl.NumberFormat('it-IT', {style: 'currency', currency: 'EUR'}).format(amount);
+
+/** Why the backend refused to turn a round into documents. */
+export const CREATE_INCASSO_ERRORS: Record<number, string> = {
+  404: 'Uno dei clienti non esiste più: controlla gli incassi.',
+  413: "Un'immagine supera i 10 MB: toglila o sostituiscila.",
+  422: 'Dati non validi, oppure un file non è una foto JPEG o PNG.',
+};

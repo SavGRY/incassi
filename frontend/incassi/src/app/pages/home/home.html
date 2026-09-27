@@ -3,16 +3,8 @@
 </div>
 
 <app-create-toggler
-  (createIncasso)="isIncassoDrawerOpen.set(true)"
+  (createIncasso)="onCreateIncasso()"
   (createCliente)="isClienteDrawerOpen.set(true)" />
-
-<p-drawer [(visible)]="isIncassoDrawerOpen" position="bottom" header="Nuovo incasso" styleClass="h-fit!">
-  <!-- A template, not projected content: the drawer builds the form when it
-       opens and destroys it when it closes, with its scanner check. -->
-  <ng-template #content>
-    <app-incasso-form (submitIncassi)="onSubmitIncassi($event)" (emitGetClient)="onGetClient()" />
-  </ng-template>
-</p-drawer>
 
 <p-drawer [(visible)]="isClienteDrawerOpen" position="bottom" header="Nuovo cliente" styleClass="h-fit!">
   @if (erroreCliente()) {
