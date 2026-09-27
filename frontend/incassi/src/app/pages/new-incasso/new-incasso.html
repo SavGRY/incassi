@@ -1,0 +1,23 @@
+<div class='flex flex-col gap-4 pb-8'>
+  <div class='flex items-center gap-3'>
+    <button
+      type='button'
+      pButton
+      [text]='true'
+      [rounded]='true'
+      routerLink='/'
+      class='h-9! w-9! justify-center p-0!'
+      aria-label='Indietro'>
+      <i pButtonIcon class='fa fa-chevron-left'></i>
+    </button>
+    <h1 class='text-lg font-semibold dark:text-white'>Nuovo incasso</h1>
+  </div>
+
+  <app-incasso-form
+    [isSubmitting]='isSubmitting()'
+    [submitError]='submitError()'
+    (submitIncassi)='onSubmitIncassi($event)'
+    (emitGetClient)='onGetClient()' />
+</div>
+
+<p-confirmdialog />
