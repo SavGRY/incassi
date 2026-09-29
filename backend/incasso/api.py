@@ -14,6 +14,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+import pypdfium2
 from sqlalchemy.orm import Session, selectinload
 from starlette.responses import FileResponse, Response
 
@@ -24,6 +25,8 @@ from incasso.pdf import generate_incasso_pdf, generate_riepilogo_pdf
 from incasso.schema import IncassoDocument, PaymentListModel
 
 PDF_BASE_PATH = "./generated"
+# 72 dpi times this: an A4 page becomes about 300x420 px, sharp on a card.
+PREVIEW_SCALE = 0.5
 router = APIRouter(
     prefix="/incasso",
     tags=["incasso"],
@@ -180,6 +183,44 @@ async def list_incasso_documents(
         )
         for m in media_list
     ]
+
+
+@router.get(
+    path="/preview/{media_id}",
+    response_class=Response,
+    responses={200: {"content": {"image/png": {}}}},
+)
+async def preview_media(
+    request: Request,
+    media_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    API that renders the first page of one of the caller's documents as a PNG
+
+    :param media_id: The document to preview
+    :param db: The db session, defaults to Depends(get_db)
+    :return: The PNG, 404 when the document is not the caller's or its file is gone
+    """
+    user: User = request.state.user
+    media = (
+        db.query(Media).filter(Media.id == media_id, Media.user_id == user.id).first()
+    )
+    if not media or not os.path.isfile(media.pdf_path):
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    pdf = pypdfium2.PdfDocument(media.pdf_path)
+    try:
+        image = pdf[0].render(scale=PREVIEW_SCALE).to_pil()
+    finally:
+        pdf.close()
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    return Response(
+        content=buffer.getvalue(),
+        media_type="image/png",
+        headers={"Cache-Control": "private, max-age=3600"},
+    )
 
 
 @router.get(

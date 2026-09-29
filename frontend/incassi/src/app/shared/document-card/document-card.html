@@ -1,6 +1,6 @@
 <button type="button" class="flex w-33 shrink-0 snap-start flex-col gap-1.5 text-left">
   <div class="aspect-3/4 w-full">
-    <app-document-thumbnail [tipo]="document().type_of_media" />
+    <app-document-thumbnail [mediaId]="document().id" [tipo]="document().type_of_media" />
   </div>
   <span class="truncate text-sm leading-tight font-semibold dark:text-white">
     {{ document().type_of_media === 'scan' ? 'Riepilogo A4' : 'Busta' }} #{{ document().incasso_id }}
