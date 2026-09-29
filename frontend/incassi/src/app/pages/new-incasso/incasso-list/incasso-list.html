@@ -10,7 +10,7 @@
         <div class='flex w-0 min-w-0 flex-1 flex-col gap-1'>
           <div class='flex items-baseline justify-between gap-2'>
             <span class='truncate text-sm font-semibold'>{{ incasso.cliente.name }}</span>
-            <span class='shrink-0 text-sm'>{{ formatEuro(incasso.importo) }}</span>
+            <span class='shrink-0 text-sm'>{{ incasso.importo | currency }}</span>
           </div>
           <div class='flex items-center justify-between gap-2'>
             <span class='text-xs text-surface-500 dark:text-surface-400'>Cod. {{ incasso.cliente.code }}</span>
@@ -41,6 +41,6 @@
   </ul>
   <div class='flex justify-between px-2 pt-3 text-sm font-semibold'>
     <span>Totale</span>
-    <span data-testid='incassi-total'>{{ formatEuro(total()) }}</span>
+    <span data-testid='incassi-total'>{{ total() | currency }}</span>
   </div>
 }

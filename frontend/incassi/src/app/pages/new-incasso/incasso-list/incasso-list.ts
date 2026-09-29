@@ -1,12 +1,12 @@
+import {CurrencyPipe} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 import {Button} from '@openng/optimus-ui/button';
 import {Tag} from '@openng/optimus-ui/tag';
 import {type NewIncasso, TipoPagamentoEnum} from '../../../models/incasso';
-import {formatEuro} from '../../../shared/utils';
 
 @Component({
   selector: 'app-incasso-list',
-  imports: [Button, Tag],
+  imports: [Button, Tag, CurrencyPipe],
   templateUrl: './incasso-list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -22,7 +22,6 @@ export class IncassoList {
   /** The index of the row to edit. */
   select = output<number>();
 
-  readonly formatEuro = formatEuro;
   readonly ASSEGNO = TipoPagamentoEnum.ASSEGNO;
 
   total = computed(() => this.incassi().reduce((sum, incasso) => sum + incasso.importo, 0));

@@ -1,5 +1,7 @@
+import {CurrencyPipe} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {formatEuro, hasHttpStatus, retryDelay} from './utils';
+import {TestBed} from '@angular/core/testing';
+import {hasHttpStatus, provideItalianLocale, retryDelay} from './utils';
 
 describe('retryDelay', () => {
   it('doubles the wait at every retry', () => {
@@ -25,9 +27,11 @@ describe('hasHttpStatus', () => {
   });
 });
 
-describe('formatEuro', () => {
-  it('writes the amount the italian way, with two decimals', () => {
+describe('provideItalianLocale', () => {
+  it('makes a bare currency pipe write euros the italian way', () => {
+    TestBed.configureTestingModule({providers: [provideItalianLocale(), CurrencyPipe]});
+
     // The space before the symbol is a non-breaking one.
-    expect(formatEuro(1234.5)).toBe('1234,50\u00a0€');
+    expect(TestBed.inject(CurrencyPipe).transform(1234.5)).toBe('1.234,50\u00a0€');
   });
 });

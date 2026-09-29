@@ -1,4 +1,7 @@
+import {registerLocaleData} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
+import localeIt from '@angular/common/locales/it';
+import {DEFAULT_CURRENCY_CODE, LOCALE_ID, type Provider} from '@angular/core';
 
 /** What each backend answer means for someone standing next to the printer. */
 export const SCAN_ERRORS: Record<number, string> = {
@@ -20,9 +23,14 @@ export const retryDelay = (attempt: number): number => Math.min(1000 * 2 ** (att
 export const hasHttpStatus = (error: unknown, statuses: number[]): boolean =>
   error instanceof HttpErrorResponse && statuses.includes(error.status);
 
-/** An amount as Italians read it, e.g. `120,50 €`. */
-export const formatEuro = (amount: number): string =>
-  new Intl.NumberFormat('it-IT', {style: 'currency', currency: 'EUR'}).format(amount);
+/** Makes the pipes speak Italian: `date` writes `29 set 2026`, a bare `currency` writes `120,50 €`. */
+export const provideItalianLocale = (): Provider[] => {
+  registerLocaleData(localeIt);
+  return [
+    {provide: LOCALE_ID, useValue: 'it'},
+    {provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR'},
+  ];
+};
 
 /** Why the backend refused to turn a round into documents. */
 export const CREATE_INCASSO_ERRORS: Record<number, string> = {

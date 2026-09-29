@@ -4,7 +4,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter} from '@angular/router';
 import type {Client} from '../../../models/Client';
 import {type IncassiSubmission, type NewIncasso, TipoPagamentoEnum} from '../../../models/incasso';
-import {formatEuro, retryDelay, SCANNER_RECHECK_INTERVAL_MS} from '../../../shared/utils';
+import {provideItalianLocale, retryDelay, SCANNER_RECHECK_INTERVAL_MS} from '../../../shared/utils';
 import {IncassoForm} from './incasso-form';
 
 const SCAN_URL = 'http://localhost:8000/api/v1/scanner/scan';
@@ -96,7 +96,7 @@ describe('IncassoForm', () => {
     );
     await TestBed.configureTestingModule({
       imports: [IncassoForm],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([]), provideItalianLocale()],
     }).compileComponents();
 
     httpMock = TestBed.inject(HttpTestingController);
@@ -146,7 +146,7 @@ describe('IncassoForm', () => {
       await addIncasso(CASH);
       await addIncasso(CHEQUE);
 
-      expect(element().querySelector('[data-testid="incassi-total"]')?.textContent).toBe(formatEuro(200.5));
+      expect(element().querySelector('[data-testid="incassi-total"]')?.textContent).toBe('200,50\u00a0€');
     });
 
     it('loads an incasso back into the form to edit it', async () => {
@@ -668,8 +668,8 @@ describe('IncassoForm', () => {
     it('shows the totals for cash and cheques', () => {
       const totals = element().querySelector('[data-testid="totals-by-type"]')?.textContent;
 
-      expect(totals).toContain(formatEuro(120.5));
-      expect(totals).toContain(formatEuro(80));
+      expect(totals).toContain('120,50\u00a0€');
+      expect(totals).toContain('80,00\u00a0€');
     });
 
     it('shows how many images there are', () => {
