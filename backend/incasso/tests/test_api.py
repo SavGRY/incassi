@@ -202,3 +202,46 @@ def test_list_documents_hides_the_other_users_documents(auth_headers, db_session
         db_session.delete(incasso)
         db_session.delete(other)
         db_session.commit()
+
+
+def preview_url(media_id: int) -> str:
+    return f"{API_PREFIX}/incasso/preview/{media_id}"
+
+
+def test_preview_renders_the_first_page_as_png(auth_headers):
+    client.post(CREATE_URL, data=payment_form(a_payment()), headers=auth_headers)
+    document = client.get(LIST_URL, headers=auth_headers).json()[0]
+
+    response = client.get(preview_url(document["id"]), headers=auth_headers)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert response.content.startswith(b"\x89PNG")
+
+
+def test_preview_requires_authentication():
+    response = client.get(preview_url(1))
+
+    assert response.status_code == 401
+
+
+def test_preview_hides_the_other_users_documents(auth_headers, db_session):
+    client.post(CREATE_URL, data=payment_form(a_payment()), headers=auth_headers)
+    own_id = client.get(LIST_URL, headers=auth_headers).json()[0]["id"]
+    other = User(email="preview-other@example.com", password="x", is_active=True)
+    incasso = Incasso(user=other, creation_date=datetime.now())
+    media = Media(user=other, pdf_path="", type_of_media=TypeOfMedia.envelope)
+    incasso.media = [media]
+    db_session.add(incasso)
+    db_session.commit()
+    # A real file, so only the ownership check can refuse it.
+    media.pdf_path = db_session.get(Media, own_id).pdf_path
+    db_session.commit()
+
+    try:
+        response = client.get(preview_url(media.id), headers=auth_headers)
+        assert response.status_code == 404
+    finally:
+        db_session.delete(incasso)
+        db_session.delete(other)
+        db_session.commit()
