@@ -18,7 +18,9 @@ export class Home {
   private readonly docService = inject(DocumentService);
   private readonly router = inject(Router);
   private readonly clientService = inject(ClientService);
-  documents = this.docService.documents();
+  /** How many documents the carousel shows: the rest is behind "Mostra tutto". */
+  private readonly RECENT_DOCUMENTS = 10;
+  documents = this.docService.getDocuments(this.RECENT_DOCUMENTS);
 
   isClienteDrawerOpen = signal(false);
   erroreCliente = signal('');

@@ -16,11 +16,13 @@ type DocumentFilter = 'tutti' | DocumentType;
 export class DocumentList {
   private readonly documentService = inject(DocumentService);
 
+  private readonly documents = this.documentService.getDocuments();
+
   filter = signal<DocumentFilter>('tutti');
 
   filteredDocuments = computed(() => {
-    const documents: IncassiDocument[] = this.documentService.documents();
-    return this.filter() === 'tutti' ? documents : documents.filter((el) => el.tipo === this.filter());
+    const documents: IncassiDocument[] = this.documents();
+    return this.filter() === 'tutti' ? documents : documents.filter((el) => el.type_of_media === this.filter());
   });
 
   setFilter(filtro: DocumentFilter): void {

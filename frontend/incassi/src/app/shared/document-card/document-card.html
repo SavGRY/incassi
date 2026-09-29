@@ -1,11 +1,11 @@
 <button type="button" class="flex w-33 shrink-0 snap-start flex-col gap-1.5 text-left">
   <div class="aspect-3/4 w-full">
-    <app-document-thumbnail [tipo]="document().tipo" />
+    <app-document-thumbnail [tipo]="document().type_of_media" />
   </div>
   <span class="truncate text-sm leading-tight font-semibold dark:text-white">
-    {{ document().nome }}
+    {{ document().type_of_media === 'scan' ? 'Riepilogo A4' : 'Busta' }} #{{ document().incasso_id }}
   </span>
   <span class="text-xs text-surface-500 dark:text-surface-400">
-    {{ document().data | date: 'd MMM y' }}
+    {{ document().creation_date | date: 'd MMM y' }}
   </span>
 </button>

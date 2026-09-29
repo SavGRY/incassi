@@ -2,6 +2,7 @@ import {registerLocaleData} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import localeIt from '@angular/common/locales/it';
 import {DEFAULT_CURRENCY_CODE, LOCALE_ID, type Provider} from '@angular/core';
+import type {DocumentType} from '../models/document';
 
 /** What each backend answer means for someone standing next to the printer. */
 export const SCAN_ERRORS: Record<number, string> = {
@@ -30,6 +31,12 @@ export const provideItalianLocale = (): Provider[] => {
     {provide: LOCALE_ID, useValue: 'it'},
     {provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR'},
   ];
+};
+
+/** The tag that tells a document type apart, on cards and list rows. */
+export const DOCUMENT_TAGS: Record<DocumentType, {label: string; severity: 'info' | 'secondary'}> = {
+  scan: {label: 'A4', severity: 'info'},
+  busta: {label: 'Busta', severity: 'secondary'},
 };
 
 /** Why the backend refused to turn a round into documents. */

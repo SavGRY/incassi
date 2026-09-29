@@ -29,11 +29,11 @@
       type="button"
       class="rounded-full border px-3.5 py-1.5 text-sm font-semibold"
       [class]="
-        filter() === 'a4'
+        filter() === 'scan'
           ? 'border-transparent bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-300'
           : 'border-surface-200 dark:border-surface-700 dark:text-surface-300'
       "
-      (click)="setFilter('a4')">
+      (click)="setFilter('scan')">
       Riepilogo A4
     </button>
     <button
@@ -52,6 +52,8 @@
   <div>
     @for (doc of filteredDocuments(); track doc.id) {
       <app-document-list-item [document]="doc" />
+    } @empty {
+      <p class="py-6 text-center text-sm text-surface-500 dark:text-surface-400">Nessun documento.</p>
     }
   </div>
 </div>
