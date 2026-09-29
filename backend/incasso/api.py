@@ -9,18 +9,19 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
     Request,
     UploadFile,
     status,
 )
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from starlette.responses import FileResponse, Response
 
 from core.db.database import get_db
 from core.db.models import Incasso, Client, Payment, Media, User, TypeOfMedia
 from incasso.images import read_images
 from incasso.pdf import generate_incasso_pdf, generate_riepilogo_pdf
-from incasso.schema import PaymentListModel
+from incasso.schema import IncassoDocument, PaymentListModel
 
 PDF_BASE_PATH = "./generated"
 router = APIRouter(
@@ -144,6 +145,41 @@ def create_media(
     db.commit()
     db.refresh(media)
     return media
+
+
+@router.get(path="/list", response_model=list[IncassoDocument])
+async def list_incasso_documents(
+    request: Request,
+    limit: int | None = Query(default=None, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """
+    API that lists the documents generated for the caller's incassi, newest first
+
+    :param limit: How many documents to return, all of them when omitted
+    :param db: The db session, defaults to Depends(get_db)
+    :return: The documents, empty when there is none
+    """
+    user: User = request.state.user
+    media_list = (
+        db.query(Media)
+        .options(selectinload(Media.incasso).selectinload(Incasso.payments))
+        .filter(Media.user_id == user.id, Media.incasso_id.is_not(None))
+        .order_by(Media.creation_date.desc(), Media.id.desc())
+        .limit(limit)
+        .all()
+    )
+    return [
+        IncassoDocument(
+            id=m.id,
+            incasso_id=m.incasso_id,
+            type_of_media=m.type_of_media,
+            creation_date=m.creation_date,
+            payments_count=len(m.incasso.payments),
+            total=sum(p.amount for p in m.incasso.payments),
+        )
+        for m in media_list
+    ]
 
 
 @router.get(

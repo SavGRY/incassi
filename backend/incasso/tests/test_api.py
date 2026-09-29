@@ -1,8 +1,9 @@
 import json
+from datetime import datetime
 
 from fastapi.testclient import TestClient
 
-from core.db.models import Incasso, Payment
+from core.db.models import Incasso, Media, Payment, TypeOfMedia, User
 from core.domain import API_PREFIX
 from core.main import app
 from incasso.images import MAX_IMAGE_BYTES, MAX_IMAGES
@@ -12,6 +13,7 @@ from incasso.tests.conftest import TEST_CLIENT_CODE
 client = TestClient(app)
 
 CREATE_URL = f"{API_PREFIX}/incasso/create"
+LIST_URL = f"{API_PREFIX}/incasso/list"
 
 # The smallest valid PNG: a single transparent pixel.
 PNG_BYTES = bytes.fromhex(
@@ -145,3 +147,58 @@ def assert_nothing_saved(db_session, test_user) -> None:
     assert not (
         db_session.query(Payment).filter(Payment.client_code == TEST_CLIENT_CODE).all()
     )
+
+
+def test_list_documents_requires_authentication():
+    response = client.get(LIST_URL)
+
+    assert response.status_code == 401
+
+
+def test_list_documents_returns_the_newest_first_with_a_recap(auth_headers):
+    client.post(CREATE_URL, data=payment_form(a_payment()), headers=auth_headers)
+    client.post(
+        CREATE_URL,
+        data=payment_form(a_payment(), a_payment(type_of_payment="check", amount=80)),
+        files=[a_png()],
+        headers=auth_headers,
+    )
+
+    response = client.get(LIST_URL, headers=auth_headers)
+
+    assert response.status_code == 200
+    documents = response.json()
+    assert [d["type_of_media"] for d in documents] == ["scan", "busta", "busta"]
+    assert documents[0]["incasso_id"] == documents[1]["incasso_id"]
+    assert documents[0]["payments_count"] == 2
+    assert documents[0]["total"] == 200.5
+    assert documents[2]["total"] == 120.5
+
+
+def test_list_documents_honours_the_limit(auth_headers):
+    client.post(
+        CREATE_URL,
+        data=payment_form(a_payment()),
+        files=[a_png()],
+        headers=auth_headers,
+    )
+
+    response = client.get(f"{LIST_URL}?limit=1", headers=auth_headers)
+
+    assert len(response.json()) == 1
+
+
+def test_list_documents_hides_the_other_users_documents(auth_headers, db_session):
+    other = User(email="incasso-other@example.com", password="x", is_active=True)
+    incasso = Incasso(user=other, creation_date=datetime.now())
+    incasso.media = [Media(user=other, pdf_path="", type_of_media=TypeOfMedia.envelope)]
+    db_session.add(incasso)
+    db_session.commit()
+
+    try:
+        response = client.get(LIST_URL, headers=auth_headers)
+        assert response.json() == []
+    finally:
+        db_session.delete(incasso)
+        db_session.delete(other)
+        db_session.commit()

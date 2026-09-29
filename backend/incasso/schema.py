@@ -1,8 +1,11 @@
+from datetime import datetime
 from typing import Any
 from enum import Enum
 
 from pydantic import ConfigDict, BaseModel, Field, model_validator
 from pydantic_core import from_json
+
+from core.db.models import TypeOfMedia
 
 
 class TypeOfPaymentEnum(str, Enum):
@@ -59,3 +62,14 @@ class Payment(BaseModel):
     client_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class IncassoDocument(BaseModel):
+    """A generated document (envelope or A4 scan) with a recap of its incasso"""
+
+    id: int
+    incasso_id: int
+    type_of_media: TypeOfMedia
+    creation_date: datetime
+    payments_count: int
+    total: float
