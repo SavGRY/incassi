@@ -1,14 +1,22 @@
-import {Injectable, signal} from '@angular/core';
-import {IncassiDocument} from '../models/document';
+import {httpResource} from '@angular/common/http';
+import {computed, Injectable, type Signal} from '@angular/core';
+import type {IncassiDocument} from '../models/document';
 
 @Injectable({providedIn: 'root'})
 export class DocumentService {
-  readonly documents = signal<IncassiDocument[]>([
-    {id: '1', nome: 'Riepilogo Giro 12', data: new Date('2026-09-15'), tipo: 'a4', dettaglio: '3 assegni, 4 ricevute'},
-    {id: '2', nome: 'Busta Bianchi S.p.A.', data: new Date('2026-09-15'), tipo: 'busta', dettaglio: '€ 640,00'},
-    {id: '3', nome: 'Riepilogo Giro 11', data: new Date('2026-09-12'), tipo: 'a4', dettaglio: '2 assegni, 3 ricevute'},
-    {id: '4', nome: 'Busta Verdi Logistica', data: new Date('2026-09-10'), tipo: 'busta', dettaglio: '€ 380,00'},
-    {id: '5', nome: 'Busta Colombo Import', data: new Date('2026-09-09'), tipo: 'busta', dettaglio: '€ 220,00'},
-    {id: '6', nome: 'Riepilogo Giro 10', data: new Date('2026-09-08'), tipo: 'a4', dettaglio: '1 assegno, 2 ricevute'},
-  ]);
+  private readonly API_URL = 'http://localhost:8000/api/v1/incasso/list';
+
+  /**
+   * The user's documents, newest first, `limit` of them when given.
+   *
+   * Call it from a component field (it needs an injection context): every
+   * page opening loads the documents again, the ones just created included.
+   */
+  getDocuments(limit?: number): Signal<IncassiDocument[]> {
+    const response = httpResource<IncassiDocument[]>(() => ({url: this.API_URL, params: limit ? {limit} : undefined}), {
+      defaultValue: [],
+    });
+    // After a failed load there is no value: the page just shows no documents.
+    return computed(() => (response.hasValue() ? response.value() : []));
+  }
 }

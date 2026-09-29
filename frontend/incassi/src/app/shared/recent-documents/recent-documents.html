@@ -18,6 +18,10 @@
     <div #carousel class="flex snap-x snap-mandatory gap-3.5 overflow-x-auto scroll-smooth px-1 pb-1">
       @for (doc of documents(); track doc.id) {
         <app-document-card [document]="doc" />
+      } @empty {
+        <p class="w-full py-6 text-center text-sm text-surface-500 dark:text-surface-400">
+          Nessun incasso creato finora.
+        </p>
       }
     </div>
 

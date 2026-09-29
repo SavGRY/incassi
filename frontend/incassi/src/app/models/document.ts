@@ -1,9 +1,11 @@
-export type DocumentType = 'a4' | 'busta';
+export type DocumentType = 'scan' | 'busta';
 
+/** A generated document as `GET /incasso/list` returns it. */
 export interface IncassiDocument {
-  id: string;
-  nome: string;
-  data: Date;
-  tipo: DocumentType;
-  dettaglio: string;
+  id: number;
+  incasso_id: number;
+  type_of_media: DocumentType;
+  creation_date: string;
+  payments_count: number;
+  total: number;
 }
