@@ -2,7 +2,7 @@
   type="button"
   class="flex w-full items-center gap-3 border-b border-surface-200 py-3 text-left last:border-b-0 dark:border-surface-700">
   <div class="h-12 w-9 shrink-0">
-    <app-document-thumbnail [tipo]="document().type_of_media" [showBadge]="false" />
+    <app-document-thumbnail [mediaId]="document().id" [tipo]="document().type_of_media" [showBadge]="false" />
   </div>
   <div class="min-w-0 flex-1">
     <div class="truncate text-sm font-semibold dark:text-surface-0">
