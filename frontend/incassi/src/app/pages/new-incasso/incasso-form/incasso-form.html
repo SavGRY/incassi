@@ -202,11 +202,11 @@
               <dl class='m-0 flex flex-col gap-1 px-2 text-sm' data-testid='totals-by-type'>
                 <div class='flex justify-between'>
                   <dt>Contanti</dt>
-                  <dd class='m-0'>{{ formatEuro(totalsByType()[CONTANTI]) }}</dd>
+                  <dd class='m-0'>{{ totalsByType()[CONTANTI] | currency }}</dd>
                 </div>
                 <div class='flex justify-between'>
                   <dt>Assegni</dt>
-                  <dd class='m-0'>{{ formatEuro(totalsByType()[ASSEGNO]) }}</dd>
+                  <dd class='m-0'>{{ totalsByType()[ASSEGNO] | currency }}</dd>
                 </div>
               </dl>
             </section>

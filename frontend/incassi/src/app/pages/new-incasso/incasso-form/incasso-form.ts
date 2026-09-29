@@ -1,3 +1,4 @@
+import {CurrencyPipe} from '@angular/common';
 import type {HttpErrorResponse} from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
@@ -27,7 +28,7 @@ import type {Client} from '../../../models/Client';
 import {type IncassiSubmission, type NewIncasso, type TipoPagamento, TipoPagamentoEnum} from '../../../models/incasso';
 import {ClientService} from '../../../services/client-service';
 import {ScannerService} from '../../../services/scanner-service';
-import {formatEuro, SCAN_ERRORS} from '../../../shared/utils';
+import {SCAN_ERRORS} from '../../../shared/utils';
 import {IncassoList} from '../incasso-list/incasso-list';
 
 /** An image of the round, with the URL that shows its thumbnail. */
@@ -53,6 +54,7 @@ interface RoundImage {
     StepPanels,
     StepPanel,
     IncassoList,
+    CurrencyPipe,
   ],
   templateUrl: './incasso-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -120,7 +122,6 @@ export class IncassoForm implements OnInit {
 
   private readonly fileUpload = viewChild(FileUpload);
 
-  readonly formatEuro = formatEuro;
   readonly CONTANTI = TipoPagamentoEnum.CONTANTI;
   readonly ASSEGNO = TipoPagamentoEnum.ASSEGNO;
 

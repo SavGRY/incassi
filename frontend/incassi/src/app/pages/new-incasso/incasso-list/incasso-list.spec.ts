@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import type {Client} from '../../../models/Client';
 import {type NewIncasso, TipoPagamentoEnum} from '../../../models/incasso';
-import {formatEuro} from '../../../shared/utils';
+import {provideItalianLocale} from '../../../shared/utils';
 import {IncassoList} from './incasso-list';
 
 const ROSSI: Client = {code: 12, name: 'Rossi S.r.l.', address: null, city: 'Milano', province: 'MI'};
@@ -15,6 +15,8 @@ const INCASSI: NewIncasso[] = [
 describe('IncassoList', () => {
   let fixture: ComponentFixture<IncassoList>;
   let element: HTMLElement;
+
+  beforeEach(() => TestBed.configureTestingModule({providers: [provideItalianLocale()]}));
 
   const render = (incassi: NewIncasso[], readonly = false): void => {
     fixture = TestBed.createComponent(IncassoList);
@@ -40,14 +42,14 @@ describe('IncassoList', () => {
     expect(rows).toHaveLength(2);
     expect(rows[0].textContent).toContain('Rossi S.r.l.');
     expect(rows[0].textContent).toContain('Contanti');
-    expect(rows[0].textContent).toContain(formatEuro(120.5));
+    expect(rows[0].textContent).toContain('120,50\u00a0€');
     expect(rows[1].textContent).toContain('Assegno');
   });
 
   it('sums the amounts', () => {
     render(INCASSI);
 
-    expect(element.querySelector('[data-testid="incassi-total"]')?.textContent).toBe(formatEuro(200.5));
+    expect(element.querySelector('[data-testid="incassi-total"]')?.textContent).toBe('200,50\u00a0€');
   });
 
   it('asks to remove a row', () => {
