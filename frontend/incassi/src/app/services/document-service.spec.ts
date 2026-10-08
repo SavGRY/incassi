@@ -60,4 +60,20 @@ describe('DocumentService', () => {
     await settle();
     expect(documents()).toEqual([]);
   });
+
+  it('saves the PDF of a document', () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:pdf');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    TestBed.inject(DocumentService).download(BUSTA).subscribe();
+    httpMock
+      .expectOne('http://localhost:8000/api/v1/incasso/download-incasso/3?type_of_download=busta')
+      .flush(new Blob(['pdf'], {type: 'application/pdf'}));
+
+    const link = click.mock.contexts[0] as HTMLAnchorElement;
+    expect(link.download).toBe('busta_3.pdf');
+    expect(link.href).toBe('blob:pdf');
+    vi.restoreAllMocks();
+  });
 });

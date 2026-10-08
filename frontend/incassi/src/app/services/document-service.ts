@@ -1,9 +1,13 @@
-import {type HttpResourceRef, httpResource} from '@angular/common/http';
-import {computed, Injectable, type Signal} from '@angular/core';
+import {HttpClient, type HttpResourceRef, httpResource} from '@angular/common/http';
+import {computed, Injectable, inject, type Signal} from '@angular/core';
+import {map, type Observable} from 'rxjs';
 import type {IncassiDocument} from '../models/document';
+import {saveFile} from '../shared/utils';
 
 @Injectable({providedIn: 'root'})
 export class DocumentService {
+  private readonly http = inject(HttpClient);
+
   private readonly API_URL = 'http://localhost:8000/api/v1/incasso';
 
   /**
@@ -30,5 +34,16 @@ export class DocumentService {
    */
   getPreview(mediaId: () => number): HttpResourceRef<Blob | undefined> {
     return httpResource.blob(() => `${this.API_URL}/preview/${mediaId()}`);
+  }
+
+  /** Saves the PDF of `document` on the device. */
+  download(document: IncassiDocument): Observable<void> {
+    const name = document.type_of_media === 'scan' ? 'riepilogo' : 'busta';
+    return this.http
+      .get(`${this.API_URL}/download-incasso/${document.incasso_id}`, {
+        params: {type_of_download: document.type_of_media},
+        responseType: 'blob',
+      })
+      .pipe(map((pdf) => saveFile(pdf, `${name}_${document.incasso_id}.pdf`)));
   }
 }

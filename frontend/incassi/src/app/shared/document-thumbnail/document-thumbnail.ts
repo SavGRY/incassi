@@ -1,4 +1,5 @@
 import {Component, computed, effect, inject, input} from '@angular/core';
+import {Image} from '@openng/optimus-ui/image';
 import {Tag} from '@openng/optimus-ui/tag';
 import type {DocumentType} from '../../models/document';
 import {DocumentService} from '../../services/document-service';
@@ -6,7 +7,7 @@ import {DOCUMENT_TAGS} from '../utils';
 
 @Component({
   selector: 'app-document-thumbnail',
-  imports: [Tag],
+  imports: [Tag, Image],
   templateUrl: './document-thumbnail.html',
 })
 export class DocumentThumbnail {

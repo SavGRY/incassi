@@ -7,9 +7,18 @@
       class="absolute top-1.5 right-1.5 z-10" />
   }
   @if (previewUrl(); as url) {
-    <img [src]='url' alt='' aria-hidden='true' class='h-full w-full'
-         [class]='tipo() === "busta" ? "object-contain" : "object-cover object-top"' />
+    <p-image [src]='url' [preview]='true' alt='Image'>
+      <ng-template #indicator>
+        <i class='pi pi-search'></i>
+      </ng-template>
+      <ng-template #image>
+        <img [src]='url' alt=''/>
+      </ng-template>
+      <ng-template #preview let-style='style' let-previewCallback='previewCallback'>
+        <img [src]='url' alt='' [style]='style' (click)='previewCallback()' />
+      </ng-template>
+    </p-image>
   } @else {
-    <i class="pi pi-file text-2xl text-surface-400" aria-hidden="true"></i>
+    <i class="fa-regular fa-file text-2xl text-surface-400" aria-hidden="true"></i>
   }
 </div>
