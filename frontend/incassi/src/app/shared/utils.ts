@@ -45,3 +45,14 @@ export const CREATE_INCASSO_ERRORS: Record<number, string> = {
   413: "Un'immagine supera i 10 MB: toglila o sostituiscila.",
   422: 'Dati non validi, oppure un file non è una foto JPEG o PNG.',
 };
+
+/** Hands `blob` to the browser as a download named `name`. */
+export const saveFile = (blob: Blob, name: string): void => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  // Freed once the browser has started the download.
+  setTimeout(() => URL.revokeObjectURL(url));
+};

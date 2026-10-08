@@ -45,7 +45,7 @@ describe('DocumentThumbnail', () => {
     await fixture.whenStable();
 
     expect(fixture.nativeElement.querySelector('img')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.pi-file')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.fa-file')).not.toBeNull();
   });
 
   it('frees the preview once gone', async () => {
