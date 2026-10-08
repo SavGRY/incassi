@@ -2,13 +2,13 @@ FROM python:3.14-slim-bookworm
 
 WORKDIR /backend
 
-COPY requirements.txt .
-
+# weasyprint runtime libs; everything else ships as prebuilt wheels
 RUN apt-get update -y && \
     apt-get upgrade -y && \
-    apt-get install -y gcc libpq-dev cargo && \
-    # weasyprint libs
-    apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 libjpeg-dev libopenjp2-7-dev libffi-dev
+    apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
