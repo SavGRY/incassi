@@ -1,0 +1,24 @@
+<div
+  class="relative flex h-full w-full items-center justify-center overflow-hidden rounded-lg border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900">
+  @if (showBadge()) {
+    <p-tag
+      [value]="tag().label"
+      [severity]="tag().severity"
+      class="absolute top-1.5 right-1.5 z-10" />
+  }
+  @if (previewUrl(); as url) {
+    <p-image [src]='url' [preview]='true' alt='Image'>
+      <ng-template #indicator>
+        <i class='pi pi-search'></i>
+      </ng-template>
+      <ng-template #image>
+        <img [src]='url' alt=''/>
+      </ng-template>
+      <ng-template #preview let-style='style' let-previewCallback='previewCallback'>
+        <img [src]='url' alt='' [style]='style' (click)='previewCallback()' />
+      </ng-template>
+    </p-image>
+  } @else {
+    <i class="fa-regular fa-file text-2xl text-surface-400" aria-hidden="true"></i>
+  }
+</div>

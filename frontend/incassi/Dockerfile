@@ -1,15 +1,15 @@
-FROM node:24-alpine3.20
+FROM node:24-slim
 LABEL maintainer="Rudy Savini"
 
 WORKDIR /incassi
 
-RUN apk update &&\
-    apk upgrade --no-cache &&\
-    apk add --no-cache g++ gcc libgcc libstdc++ linux-headers make python3 firefox py3-pip
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci && npm cache clean --force
 
 COPY . .
 

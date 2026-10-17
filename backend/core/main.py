@@ -12,12 +12,19 @@ from core.middleware import (
 from client.api import router as client_router
 from auth.api import router as auth_router
 from incasso.api import router as incasso_router
+from scanner.api import router as scanner_router
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# Add middleware using the factory function
+app.middleware("http")(create_login_middleware())
+app.middleware("http")(create_already_authenticated_middleware())
 
+# Starlette runs the middleware added *last* first. CORS has to be the outermost
+# layer: it answers preflights (which never carry `Authorization`) before the
+# login check sees them, and adds its headers to the 401/403 the checks return.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ORIGINS,
@@ -25,14 +32,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Add middleware using the factory function
-app.middleware("http")(create_login_middleware())
-app.middleware("http")(create_already_authenticated_middleware())
 # Including all routes
 app.include_router(router=auth_router, prefix=API_PREFIX)
 app.include_router(router=client_router, prefix=API_PREFIX)
 app.include_router(router=incasso_router, prefix=API_PREFIX)
+app.include_router(router=scanner_router, prefix=API_PREFIX)
 
 
 @app.get("/")

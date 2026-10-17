@@ -1,0 +1,38 @@
+<section class="flex flex-col gap-3">
+  <div class="flex items-baseline justify-between">
+    <h2 class="text-lg font-semibold dark:text-white">Ultimi incassi creati</h2>
+    <p-button label="Mostra tutto" [text]="true" size="small" routerLink="/documents" />
+  </div>
+
+  <div class="relative">
+    <p-button
+      icon="fa"
+      class="absolute top-1/2 -left-2 z-10 -translate-y-1/2"
+      [outlined]="true"
+      [rounded]="true"
+      size="small"
+      ariaLabel="Documenti precedenti"
+      [class]="'fa-chevron-left'"
+      (onClick)="scrollBack()" />
+
+    <div #carousel class="flex snap-x snap-mandatory gap-3.5 overflow-x-auto scroll-smooth px-1 pb-1">
+      @for (doc of documents(); track doc.id) {
+        <app-document-card [document]="doc" />
+      } @empty {
+        <p class="w-full py-6 text-center text-sm text-surface-500 dark:text-surface-400">
+          Nessun incasso creato finora.
+        </p>
+      }
+    </div>
+
+    <p-button
+      icon="fa"
+      class="absolute top-1/2 -right-2 z-10 -translate-y-1/2"
+      [outlined]="true"
+      [rounded]="true"
+      size="small"
+      ariaLabel="Documenti successivi"
+      [class]="'fa-chevron-right'"
+      (onClick)="scrollForward()" />
+  </div>
+</section>

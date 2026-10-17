@@ -1,0 +1,81 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+  <div class="flex flex-col gap-2">
+    <label for="cliente-code" class="text-sm font-medium leading-normal">Codice cliente</label>
+    <input
+      pInputText
+      id="cliente-code"
+      type="number"
+      inputmode="numeric"
+      min="1"
+      step="1"
+      formControlName="code"
+      placeholder="Es. 142"
+      required
+      class="w-full rounded-lg px-3 py-2 shadow-sm" />
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label for="cliente-name" class="text-sm font-medium leading-normal">Ragione sociale</label>
+    <input
+      pInputText
+      id="cliente-name"
+      type="text"
+      formControlName="name"
+      placeholder="Es. Bianchi S.p.A."
+      autocomplete="organization"
+      required
+      class="w-full rounded-lg px-3 py-2 shadow-sm" />
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label for="cliente-address" class="text-sm font-medium leading-normal">Indirizzo</label>
+    <input
+      pInputText
+      id="cliente-address"
+      type="text"
+      formControlName="address"
+      placeholder="Via, civico"
+      autocomplete="street-address"
+      class="w-full rounded-lg px-3 py-2 shadow-sm" />
+  </div>
+
+  <div class="flex items-start gap-3">
+    <div class="flex grow flex-col gap-2">
+      <label for="cliente-city" class="text-sm font-medium leading-normal">Città</label>
+      <input
+        pInputText
+        id="cliente-city"
+        type="text"
+        formControlName="city"
+        placeholder="Es. Milano"
+        autocomplete="address-level2"
+        required
+        class="w-full rounded-lg px-3 py-2 shadow-sm" />
+    </div>
+
+    <div class="flex w-24 shrink-0 flex-col gap-2">
+      <label for="cliente-province" class="text-sm font-medium leading-normal">Provincia</label>
+      <input
+        pInputText
+        id="cliente-province"
+        type="text"
+        formControlName="province"
+        placeholder="MI"
+        maxlength="2"
+        autocomplete="address-level1"
+        aria-describedby="cliente-province-aiuto"
+        required
+        class="w-full rounded-lg px-3 py-2 uppercase shadow-sm" />
+      <span id="cliente-province-aiuto" class="text-xs opacity-70">Sigla di 2 lettere</span>
+    </div>
+  </div>
+
+  <button
+    type="submit"
+    pButton
+    [disabled]="!isFormValid()"
+    [class]="!isFormValid() ? '!cursor-not-allowed' : ''"
+    class="w-full justify-center rounded-lg py-2">
+    <span pButtonLabel>Salva cliente</span>
+  </button>
+</form>

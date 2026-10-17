@@ -1,0 +1,29 @@
+<div class="fixed right-5 bottom-6 z-30 flex flex-col items-end gap-2.5">
+  @if (isDrawerOpen()) {
+    <p-button
+      label="Crea cliente"
+      icon="fa"
+      iconPos="right"
+      [class]="'fa-user-plus'"
+      [outlined]="true"
+      styleClass="shadow-md"
+      (onClick)="onCreateCliente()" />
+    <p-button
+      label="Crea incasso"
+      icon="fa"
+      iconPos="right"
+      [class]="'fa-plus'"
+      styleClass="shadow-md"
+      (onClick)="onCreateIncasso()" />
+  }
+
+  <p-button
+    icon="fa"
+    [class]="isDrawerOpen() ? 'fa-xmark' : 'fa-plus-large'"
+    [rounded]="true"
+    size="large"
+    styleClass="shadow-lg h-14! w-14!"
+    ariaLabel="Crea nuovo"
+    [attr.aria-expanded]="isDrawerOpen()"
+    (onClick)="toggle()" />
+</div>

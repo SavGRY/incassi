@@ -5,7 +5,8 @@
 
 @plugin '@openng/optimus-ui-tailwindcss';
 
-@custom-variant dark (&:where(.dark, .dark *));
+// The same class the theme toggle puts on <html> and Optimus UI reads.
+@custom-variant dark (&:where(.dark-mode, .dark-mode *));
 
 @layer base, tailwind, primeng;
 

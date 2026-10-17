@@ -1,8 +1,11 @@
+from datetime import datetime
 from typing import Any
 from enum import Enum
 
-from pydantic import BaseModel, model_validator
+from pydantic import ConfigDict, BaseModel, Field, model_validator
 from pydantic_core import from_json
+
+from core.db.models import TypeOfMedia
 
 
 class TypeOfPaymentEnum(str, Enum):
@@ -43,12 +46,12 @@ class PaymentFromForm(BaseModel):
     type_of_payment: TypeOfPaymentEnum
     amount: float
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PaymentListModel(JsonStringModel):
-    payment_list: list[PaymentFromForm]
+    # An envelope with nobody on it means nothing.
+    payment_list: list[PaymentFromForm] = Field(min_length=1)
 
 
 class Payment(BaseModel):
@@ -58,5 +61,15 @@ class Payment(BaseModel):
     document_id: int
     client_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class IncassoDocument(BaseModel):
+    """A generated document (envelope or A4 scan) with a recap of its incasso"""
+
+    id: int
+    incasso_id: int
+    type_of_media: TypeOfMedia
+    creation_date: datetime
+    payments_count: int
+    total: float

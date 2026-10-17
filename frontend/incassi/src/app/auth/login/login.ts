@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, inject, type OnDestroy, type Signal} from '@angular/core';
+import {Component, computed, inject, type OnDestroy, type Signal, signal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {
   FormControl,
@@ -39,6 +39,7 @@ export class Login implements OnDestroy {
     initialValue: 'INVALID',
   });
   isFormValid = computed((): boolean => this.formStatusSignal() === 'VALID');
+  showPassword = signal(false);
 
   get email() {
     return this.loginForm.get('email');
@@ -48,11 +49,15 @@ export class Login implements OnDestroy {
     return this.loginForm.get('password');
   }
 
+  togglePassword(): void {
+    this.showPassword.update((shown) => !shown);
+  }
+
   onLogin(): void {
     this.subscription.add(
       this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
         next: (response: LoginResponse) => {
-          localStorage.setItem('token', response.token);
+          this.authService.saveSession(response.token);
           this.router.navigate(['/']);
         },
         error: (error) => {
